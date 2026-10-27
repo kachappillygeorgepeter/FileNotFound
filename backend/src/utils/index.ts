@@ -7,3 +7,4 @@ export * from './filenameSanitizer.js';
 export * from './expiryParser.js';
 export * from './session.js';
 export * from './fileCleanup.js';
+export * from './logger.js';

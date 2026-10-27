@@ -12,21 +12,32 @@ import {
   downloadSingleFileController,
   downloadAllZipController,
 } from '../controllers/downloadController.js';
+import {
+  uploadRateLimiter,
+  verifyPasswordRateLimiter,
+  generalRateLimiter,
+} from '../middleware/rateLimiter.js';
 
 export const shareRouter = Router();
 
-// POST /api/shares - Upload files and create a new secure share
-shareRouter.post('/shares', handleUpload, createShareController);
+// POST /api/shares - Upload files and create a new secure share (upload rate limiter)
+shareRouter.post('/shares', uploadRateLimiter, handleUpload, createShareController);
 
 // GET /api/shares/:token - Receiver lookup endpoint
-shareRouter.get('/shares/:token', resolveShareMiddleware, lookupShareController);
+shareRouter.get('/shares/:token', generalRateLimiter, resolveShareMiddleware, lookupShareController);
 
-// POST /api/shares/:token/verify - Receiver password verification
-shareRouter.post('/shares/:token/verify', resolveShareMiddleware, verifySharePasswordController);
+// POST /api/shares/:token/verify - Receiver password verification (strict brute-force limiter)
+shareRouter.post(
+  '/shares/:token/verify',
+  verifyPasswordRateLimiter,
+  resolveShareMiddleware,
+  verifySharePasswordController
+);
 
 // GET /api/shares/:token/metadata - Receiver protected metadata endpoint
 shareRouter.get(
   '/shares/:token/metadata',
+  generalRateLimiter,
   resolveShareMiddleware,
   requireSessionMiddleware,
   getProtectedMetadataController
@@ -35,6 +46,7 @@ shareRouter.get(
 // GET /api/shares/:token/files/:fileId/download - Atomic single-file download
 shareRouter.get(
   '/shares/:token/files/:fileId/download',
+  generalRateLimiter,
   resolveShareMiddleware,
   requireSessionMiddleware,
   downloadSingleFileController
@@ -43,6 +55,7 @@ shareRouter.get(
 // GET /api/shares/:token/download-all - Atomic download-all ZIP
 shareRouter.get(
   '/shares/:token/download-all',
+  generalRateLimiter,
   resolveShareMiddleware,
   requireSessionMiddleware,
   downloadAllZipController

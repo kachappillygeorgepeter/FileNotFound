@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import { createShareSchema } from '../middleware/validation.js';
 import { createShareService, UploadedFileMetadata } from '../services/shareService.js';
 import { MAX_TOTAL_SIZE_BYTES } from '../middleware/upload.js';
-import { deleteUploadedFiles } from '../utils/index.js';
+import { deleteUploadedFiles, logger } from '../utils/index.js';
 import { config } from '../config/env.js';
 
 export async function createShareController(req: Request, res: Response): Promise<void> {
@@ -59,6 +59,12 @@ export async function createShareController(req: Request, res: Response): Promis
       config.CLIENT_ORIGIN
     );
 
+    logger.info('Share created successfully', {
+      fileCount: result.fileCount,
+      maxDownloads: result.maxDownloads,
+      expiresAt: result.expiresAt,
+    });
+
     // Return strictly what the sender needs (no database IDs, no passwords, no stored paths)
     res.status(201).json({
       shareLink: result.shareLink,
@@ -67,8 +73,9 @@ export async function createShareController(req: Request, res: Response): Promis
       fileCount: result.fileCount,
     });
   } catch (error) {
-    // Errors during processing are caught here; file cleanup is already performed in service
-    console.error('Failed to create share:', error instanceof Error ? error.message : 'Unknown error');
+    logger.error('Failed to create share', {
+      error: error instanceof Error ? error.message : 'Unknown error',
+    });
     res.status(500).json({ error: 'Failed to create share. Please try again.' });
   }
 }

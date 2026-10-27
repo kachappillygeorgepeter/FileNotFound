@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import { ResolvedShare } from '../middleware/resolveShare.js';
 import { buildShareMetadata } from '../services/metadataService.js';
-import { comparePassword, createAccessSession } from '../utils/index.js';
+import { comparePassword, createAccessSession, logger } from '../utils/index.js';
 import { SESSION_COOKIE_NAME } from '../middleware/requireSession.js';
 
 // Constant dummy bcrypt hash used to normalize verification execution time
@@ -65,6 +65,10 @@ export async function verifySharePasswordController(req: Request, res: Response)
   const isMatch = await comparePassword(candidatePassword, share.passwordHash);
 
   if (!isMatch) {
+    logger.warn('Failed password attempt on share', {
+      shareId: share.id,
+      ip: req.ip,
+    });
     // Return generic error and reveal NO metadata
     res.status(401).json({ error: 'Incorrect password.' });
     return;
@@ -72,6 +76,9 @@ export async function verifySharePasswordController(req: Request, res: Response)
 
   // Password matches: generate session token, store hash in DB with 5-min expiry
   const { sessionToken, expiresAt } = await createAccessSession(share.id);
+  logger.info('Password verified successfully, session issued', {
+    shareId: share.id,
+  });
 
   // Set HTTP-only cookie for seamless browser handling
   res.cookie(SESSION_COOKIE_NAME, sessionToken, {
