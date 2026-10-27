@@ -8,6 +8,10 @@ import {
   verifySharePasswordController,
   getProtectedMetadataController,
 } from '../controllers/receiverController.js';
+import {
+  downloadSingleFileController,
+  downloadAllZipController,
+} from '../controllers/downloadController.js';
 
 export const shareRouter = Router();
 
@@ -26,4 +30,20 @@ shareRouter.get(
   resolveShareMiddleware,
   requireSessionMiddleware,
   getProtectedMetadataController
+);
+
+// GET /api/shares/:token/files/:fileId/download - Atomic single-file download
+shareRouter.get(
+  '/shares/:token/files/:fileId/download',
+  resolveShareMiddleware,
+  requireSessionMiddleware,
+  downloadSingleFileController
+);
+
+// GET /api/shares/:token/download-all - Atomic download-all ZIP
+shareRouter.get(
+  '/shares/:token/download-all',
+  resolveShareMiddleware,
+  requireSessionMiddleware,
+  downloadAllZipController
 );
