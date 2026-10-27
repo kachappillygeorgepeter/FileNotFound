@@ -1,0 +1,14 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Temporary model to allow Prisma client generation for Phase 0 health check
+model HealthPing {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+}
