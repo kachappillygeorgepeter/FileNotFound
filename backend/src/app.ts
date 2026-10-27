@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import { config } from './config/env.js';
 import { healthRouter } from './routes/health.js';
+import { shareRouter } from './routes/share.js';
 
 export function createApp(): Express {
   const app = express();
@@ -20,6 +21,7 @@ export function createApp(): Express {
 
   // Routes
   app.use('/api', healthRouter);
+  app.use('/api', shareRouter);
 
   // Catch-all 404 handler
   app.use((_req, res) => {
