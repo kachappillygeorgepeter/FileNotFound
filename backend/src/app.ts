@@ -1,6 +1,7 @@
 import express, { Express } from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
+import cookieParser from 'cookie-parser';
 import { config } from './config/env.js';
 import { healthRouter } from './routes/health.js';
 import { shareRouter } from './routes/share.js';
@@ -16,6 +17,7 @@ export function createApp(): Express {
       credentials: true,
     })
   );
+  app.use(cookieParser());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
 
