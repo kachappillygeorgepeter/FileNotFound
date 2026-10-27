@@ -7,8 +7,44 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// Temporary model to allow Prisma client generation for Phase 0 health check
-model HealthPing {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
+model Share {
+  id             String          @id @default(cuid())
+  tokenHash      String          @unique
+  passwordHash   String?
+  maxDownloads   Int
+  downloadsUsed  Int             @default(0)
+  expiresAt      DateTime
+  createdAt      DateTime        @default(now())
+  deletedAt      DateTime?
+  files          File[]
+  accessSessions AccessSession[]
+
+  @@index([expiresAt])
+  @@index([deletedAt])
+}
+
+model File {
+  id           String   @id @default(cuid())
+  shareId      String
+  share        Share    @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  originalName String
+  storedName   String   @unique
+  sizeBytes    BigInt
+  mimeType     String
+  sha256       String
+  createdAt    DateTime @default(now())
+
+  @@index([shareId])
+}
+
+model AccessSession {
+  id               String   @id @default(cuid())
+  shareId          String
+  share            Share    @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  sessionTokenHash String   @unique
+  expiresAt        DateTime
+  createdAt        DateTime @default(now())
+
+  @@index([shareId])
+  @@index([expiresAt])
 }
