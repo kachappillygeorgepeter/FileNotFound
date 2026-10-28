@@ -49,60 +49,79 @@ A high-security, zero-trust temporary file transfer service built with **Node.js
 ## Project Structure
 
 ```text
-backend/
-├── prisma/
-│   ├── migrations/         # PostgreSQL schema migrations
-│   └── schema.prisma       # Prisma models: Share, File, AccessSession
-├── src/
-│   ├── config/
-│   │   ├── db.ts           # Singleton Prisma client instance
-│   │   └── env.ts          # Zod fail-fast environment validation
-│   ├── controllers/
-│   │   ├── downloadController.ts  # Atomic single-file and ZIP stream downloads
-│   │   ├── receiverController.ts  # Lookup, password verification, and metadata
-│   │   └── shareController.ts     # Upload handler and share creation
-│   ├── jobs/
-│   │   └── cleanupJob.ts   # Non-overlapping scheduled cleanup worker
-│   ├── middleware/
-│   │   ├── errorHandler.ts # Centralized error handler (no stack trace leak)
-│   │   ├── rateLimiter.ts  # Tiered rate limiters (upload, verify, general)
-│   │   ├── requireSession.ts # Session validation for protected shares
-│   │   ├── resolveShare.ts # Shared lookup & uniform 404 response
-│   │   ├── upload.ts       # Multer configuration (size & file count caps)
-│   │   └── validation.ts   # Zod request body schemas
-│   ├── routes/
-│   │   ├── health.ts       # GET /api/health (DB and server status)
-│   │   └── share.ts        # Share creation, receiver, and download routes
-│   ├── services/
-│   │   ├── cleanupService.ts      # Fault-tolerant cleanup & disk orphan sweep
-│   │   ├── metadataService.ts     # Server-side metadata calculations
-│   │   ├── reservationService.ts  # Atomic PostgreSQL reservation update
-│   │   └── shareService.ts        # Share generation and file hash transaction
-│   ├── utils/
-│   │   ├── expiryParser.ts        # Expiry option validator (10m, 1h, 24h)
-│   │   ├── fileCleanup.ts         # Async file removal helper
-│   │   ├── fileHash.ts            # Streaming SHA-256 file checksums
-│   │   ├── filenameSanitizer.ts   # Filename sanitizer for Content-Disposition
-│   │   ├── logger.ts              # Structured JSON logger with auto-redaction
-│   │   ├── password.ts            # bcryptjs hash and compare (work factor 12)
-│   │   ├── safeCompare.ts         # crypto.timingSafeEqual wrapper
-│   │   ├── session.ts             # Session token generation & hash verification
-│   │   ├── storedFilename.ts      # UUID stored filename generator
-│   │   └── token.ts               # 32-byte URL-safe base64 token generator & hasher
-│   ├── app.ts              # Decoupled Express app (no port binding, test-ready)
-│   └── server.ts           # Server bootstrap and graceful shutdown handler
-├── tests/
-│   ├── atomicDownload.test.ts    # Concurrency and download limit tests
-│   ├── cleanupService.test.ts    # Physical deletion and cleanup tests
-│   ├── hardening.test.ts         # Headers, rate limiting, and error handling
-│   ├── receiverEndpoints.test.ts # Lookup and password verification tests
-│   ├── securityUtils.test.ts     # Unit tests for security helpers
-│   └── uploadShare.test.ts       # API integration tests for upload flows
-├── uploads/                # Private local disk storage (git-ignored)
-├── .env.example            # Template for environment variables
-├── package.json            # Scripts and dependencies
-├── REQUIREMENTS.md         # Detailed dependency specification
-└── tsconfig.json           # TypeScript configuration
+FileNotFound/
+├── .git/                      # Git repository tracking
+├── LICENSE                    # MIT License
+├── README.md                  # Comprehensive project documentation & architecture guide
+│
+├── backend/                   # Zero-trust temporary file transfer backend service
+│   ├── prisma/
+│   │   ├── migrations/        # Declarative PostgreSQL schema migrations
+│   │   └── schema.prisma      # Prisma schema (Share, File, AccessSession models)
+│   ├── src/
+│   │   ├── config/
+│   │   │   ├── db.ts          # Singleton Prisma client instance
+│   │   │   └── env.ts         # Zod fail-fast environment validation
+│   │   ├── controllers/
+│   │   │   ├── downloadController.ts # Atomic single-file & streaming ZIP downloads
+│   │   │   ├── receiverController.ts # Share metadata lookup & password verification
+│   │   │   └── shareController.ts    # Multipart upload handler & share creation
+│   │   ├── jobs/
+│   │   │   └── cleanupJob.ts  # Non-overlapping scheduled cleanup worker (cron)
+│   │   ├── middleware/
+│   │   │   ├── errorHandler.ts       # Centralized error handler (no trace leakage)
+│   │   │   ├── rateLimiter.ts         # Tiered IP/token rate-limiters
+│   │   │   ├── requireSession.ts      # Session validation for protected shares
+│   │   │   ├── resolveShare.ts        # Share lookup & uniform 404 response
+│   │   │   ├── upload.ts              # Multer configuration (size/count enforcement)
+│   │   │   └── validation.ts          # Zod request body validation schemas
+│   │   ├── routes/
+│   │   │   ├── health.ts      # GET /api/health (DB and server status)
+│   │   │   └── share.ts       # Complete share creation, receiver, and download router
+│   │   ├── services/
+│   │   │   ├── cleanupService.ts      # Physical disk deletion, wipe & orphan sweep
+│   │   │   ├── metadataService.ts     # Metadata calculation & sanitization
+│   │   │   ├── reservationService.ts  # Atomic PostgreSQL row-level reservation
+│   │   │   └── shareService.ts        # Share creation & file hashing transactions
+│   │   ├── utils/
+│   │   │   ├── expiryParser.ts        # Expiration interval validator (10m, 1h, 24h)
+│   │   │   ├── fileCleanup.ts         # Async file removal helper
+│   │   │   ├── fileHash.ts            # Streaming SHA-256 file checksums
+│   │   │   ├── filenameSanitizer.ts   # RFC-compliant filename sanitization
+│   │   │   ├── logger.ts              # Structured JSON logger with auto-redaction
+│   │   │   ├── password.ts            # bcryptjs hash and compare (work factor 12)
+│   │   │   ├── safeCompare.ts         # crypto.timingSafeEqual wrapper
+│   │   │   ├── session.ts             # Session token generator & hash verifier
+│   │   │   ├── storedFilename.ts      # UUID stored filename generator
+│   │   │   ├── token.ts               # 32-byte URL-safe base64 token generator & hasher
+│   │   │   └── index.ts               # Barrel export for utility functions
+│   │   ├── app.ts             # Decoupled Express app (no port binding, test-ready)
+│   │   └── server.ts          # Server bootstrap & graceful shutdown handler
+│   ├── tests/
+│   │   ├── atomicDownload.test.ts     # Concurrency & download limit tests
+│   │   ├── cleanupService.test.ts     # Physical deletion & orphan sweep tests
+│   │   ├── hardening.test.ts          # Security headers, rate limiting & error handling
+│   │   ├── receiverEndpoints.test.ts  # Lookup & password verification tests
+│   │   ├── securityUtils.test.ts      # Unit tests for cryptographic helpers
+│   │   └── uploadShare.test.ts        # Integration tests for upload endpoints
+│   ├── uploads/               # Private local disk storage (git-ignored)
+│   ├── .env.example           # Template for environment variables
+│   ├── eslint.config.js       # ESLint configuration
+│   ├── package.json           # Backend scripts and dependencies
+│   ├── REQUIREMENTS.md        # Detailed backend dependency specification
+│   └── tsconfig.json          # Strict TypeScript configuration
+│
+├── frontend/                  # Web application client portal
+│   └── imgs/                  # Brand and visual UI assets
+│       ├── logo.png           # FileNotFound brand logo
+│       └── logo_no_bg.png     # Transparent brand logo asset
+│
+└── mds/                       # Architectural specifications & system workflows
+    ├── BACKENDWORKFLOW.md     # Phase-by-phase backend implementation guide
+    ├── INITIAL.md             # Initial project goals, requirements & specifications
+    ├── SCHEMA_CONVENTIONS.md  # Database models, field naming & SQL conventions
+    ├── TECHSTACK.md           # Full-stack architectural tech stack guide
+    └── design.md              # Frontend UI/UX design system specification
 ```
 
 ---
