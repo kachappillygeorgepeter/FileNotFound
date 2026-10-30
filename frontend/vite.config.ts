@@ -3,15 +3,19 @@ import react from '@vitejs/plugin-react';
 import path from 'node:path';
 import fs from 'node:fs';
 
-const projectRoot = fs.realpathSync(process.cwd());
+// Resolve symlink / Windows junction drive mismatch
+const realCwd = fs.realpathSync(process.cwd());
+if (process.cwd() !== realCwd) {
+  process.chdir(realCwd);
+}
 
 // https://vite.dev/config/
 export default defineConfig({
-  root: projectRoot,
+  root: realCwd,
   plugins: [react()],
   resolve: {
     alias: {
-      '@': path.resolve(projectRoot, './src'),
+      '@': path.resolve(realCwd, './src'),
     },
   },
   build: {
@@ -27,6 +31,7 @@ export default defineConfig({
   },
   server: {
     port: 5180,
+    host: true,
     proxy: {
       '/api': {
         target: process.env.VITE_BACKEND_URL || 'http://localhost:4000',
