@@ -36,14 +36,14 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center">
             <Link
               to="/"
-              className="flex-shrink-0 flex items-center gap-3.5 text-xl md:text-2xl font-bold tracking-tight text-[#111111] uppercase group"
+              className="flex-shrink-0 flex items-center gap-3.5 text-xl md:text-2xl font-bold tracking-tight text-[#111111] group"
             >
               <img
                 src={logoImg}
                 alt="FileNotFound Logo"
                 className="h-10 w-10 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105"
               />
-              <span>FileNotFound</span>
+              <span className="normal-case">FileNotFound</span>
             </Link>
 
             {/* Desktop Navigation Links */}
