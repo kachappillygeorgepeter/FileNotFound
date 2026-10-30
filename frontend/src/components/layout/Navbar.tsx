@@ -1,24 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import logoImg from '../../../imgs/logo_no_bg.png';
-import { checkBackendHealth } from '../../services/shareService';
 
 export const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline'>('checking');
   const location = useLocation();
-
-  useEffect(() => {
-    let isMounted = true;
-    checkBackendHealth().then((health) => {
-      if (isMounted) {
-        setApiStatus(health ? 'online' : 'offline');
-      }
-    });
-    return () => {
-      isMounted = false;
-    };
-  }, []);
 
   useEffect(() => {
     setMobileMenuOpen(false);
@@ -50,12 +36,12 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center">
             <Link
               to="/"
-              className="flex-shrink-0 flex items-center gap-3 text-xl font-bold tracking-tight text-[#111111] uppercase group"
+              className="flex-shrink-0 flex items-center gap-3.5 text-xl md:text-2xl font-bold tracking-tight text-[#111111] uppercase group"
             >
               <img
                 src={logoImg}
                 alt="FileNotFound Logo"
-                className="h-8 w-8 object-contain transition-transform group-hover:scale-105"
+                className="h-10 w-10 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105"
               />
               <span>FileNotFound</span>
             </Link>
@@ -97,23 +83,7 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right Action */}
-          <div className="hidden md:flex md:items-center space-x-6">
-            <div
-              className="flex items-center gap-2 border border-[#E5E5E5] bg-[#F7F7F5] px-3 py-1.5 text-[10px] font-bold tracking-[0.2em] uppercase text-[#555555]"
-              title={
-                apiStatus === 'online'
-                  ? 'Backend connected with PostgreSQL & Express'
-                  : 'Isolated local sandbox mode active'
-              }
-            >
-              <span
-                className={`w-2 h-2 rounded-full ${
-                  apiStatus === 'online' ? 'bg-[#111111]' : 'bg-[#999999]'
-                }`}
-              />
-              <span>{apiStatus === 'online' ? 'BACKEND LIVE' : 'SANDBOX READY'}</span>
-            </div>
-
+          <div className="hidden md:flex md:items-center">
             {location.pathname === '/' ? (
               <button
                 type="button"
@@ -168,14 +138,6 @@ export const Navbar: React.FC = () => {
             ))}
 
             <div className="pt-2 flex flex-col gap-3">
-              <div className="flex items-center gap-2 text-[10px] font-bold tracking-[0.2em] uppercase text-[#555555]">
-                <span
-                  className={`w-2 h-2 rounded-full ${
-                    apiStatus === 'online' ? 'bg-[#111111]' : 'bg-[#999999]'
-                  }`}
-                />
-                <span>{apiStatus === 'online' ? 'BACKEND LIVE' : 'SANDBOX READY'}</span>
-              </div>
               <Link
                 to="/"
                 className="w-full text-center bg-[#111111] text-white py-4 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#333333] transition-colors border border-[#111111] rounded-none"
