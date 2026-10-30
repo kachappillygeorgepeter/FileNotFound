@@ -4,7 +4,7 @@ import { Button } from '../components/ui/Button';
 
 export const SecurityPage: React.FC = () => {
   return (
-    <div className="w-full bg-white selection:bg-[#111111] selection:text-white">
+    <div className="w-full bg-white select-none">
       {/* Header */}
       <section className="py-24 md:py-32 px-6 md:px-12 max-w-[1600px] mx-auto border-b border-[#E5E5E5] text-left">
         <p className="text-[#111111] text-xs font-bold tracking-[0.4em] mb-4 uppercase">

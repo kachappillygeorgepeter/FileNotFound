@@ -107,7 +107,7 @@ export const UploadPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-white selection:bg-[#111111] selection:text-white">
+    <div className="w-full min-h-screen bg-white select-none">
       {/* 1. MAIN HERO */}
       <section className="w-full min-h-[85vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 relative bg-white border-b border-[#E5E5E5]">
         <div className="max-w-[1600px] w-full mx-auto flex flex-col items-center text-center">

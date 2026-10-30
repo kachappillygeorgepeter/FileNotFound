@@ -8,17 +8,36 @@
     --foreground: #111111;
   }
 
+  /* Prevent text selection across all elements by default */
+  *,
+  *::before,
+  *::after {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
   body {
     background-color: #ffffff;
     color: #111111;
     font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, Arial, Helvetica, sans-serif;
     overflow-x: hidden;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
-  /* Monochromatic selection */
-  ::selection {
-    background-color: #111111;
-    color: #ffffff;
+  /* Form inputs and textareas retain text input and cursor capability */
+  input,
+  textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
   }
 
   /* Subtle minimal scrollbar */
