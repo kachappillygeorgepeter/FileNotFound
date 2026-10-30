@@ -63,7 +63,7 @@ export const ShareSuccessCard: React.FC<ShareSuccessCardProps> = ({
             Share Link
           </label>
           <div className="flex flex-col sm:flex-row items-stretch gap-3">
-            <div className="flex-1 border border-[#E5E5E5] bg-[#F7F7F5] rounded-none px-4 py-4 text-xs font-mono text-[#111111] select-all break-all flex items-center">
+            <div className="flex-1 border border-[#E5E5E5] bg-[#F7F7F5] rounded-none px-4 py-4 text-xs font-mono text-[#111111] select-none break-all flex items-center">
               {shareData.shareLink}
             </div>
             <button

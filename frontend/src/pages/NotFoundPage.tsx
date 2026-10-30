@@ -11,7 +11,7 @@ export const NotFoundPage: React.FC = () => {
         </p>
 
         <div className="space-y-2">
-          <h2 className="text-xl font-extrabold text-[#111111] uppercase tracking-tight">
+          <h2 className="text-xl font-extrabold text-[#111111] normal-case tracking-tight">
             FileNotFound
           </h2>
           <p className="text-xs text-[#555555] leading-relaxed">

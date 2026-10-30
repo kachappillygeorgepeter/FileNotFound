@@ -8,17 +8,36 @@
     --foreground: #111111;
   }
 
+  /* Prevent text selection across all elements by default */
+  *,
+  *::before,
+  *::after {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+
   body {
     background-color: #ffffff;
     color: #111111;
     font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, Arial, Helvetica, sans-serif;
     overflow-x: hidden;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
   }
 
-  /* Monochromatic selection */
-  ::selection {
-    background-color: #111111;
-    color: #ffffff;
+  /* Form inputs and textareas retain text input and cursor capability */
+  input,
+  textarea {
+    -webkit-user-select: text;
+    -moz-user-select: text;
+    -ms-user-select: text;
+    user-select: text;
   }
 
   /* Subtle minimal scrollbar */
@@ -40,6 +59,31 @@
   }
 }
 
+/* Audio Equalizer / Bar Loader Keyframe Animation */
+@keyframes barEqualizer {
+  0%, 100% {
+    transform: scaleY(0.2);
+  }
+  20% {
+    transform: scaleY(0.75);
+  }
+  40% {
+    transform: scaleY(0.35);
+  }
+  60% {
+    transform: scaleY(1);
+  }
+  80% {
+    transform: scaleY(0.5);
+  }
+}
+
+.animate-equalizer-bar {
+  animation: barEqualizer 1.15s cubic-bezier(0.45, 0.05, 0.55, 0.95) infinite;
+  transform-origin: bottom;
+  will-change: transform;
+}
+
 /* Reduced motion preference */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -49,5 +93,10 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .animate-equalizer-bar {
+    animation: none !important;
+    transform: scaleY(0.5) !important;
   }
 }

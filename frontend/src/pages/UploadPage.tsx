@@ -107,11 +107,11 @@ export const UploadPage: React.FC = () => {
   };
 
   return (
-    <div className="w-full min-h-screen bg-white selection:bg-[#111111] selection:text-white">
+    <div className="w-full min-h-screen bg-white select-none">
       {/* 1. MAIN HERO */}
       <section className="w-full min-h-[85vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 relative bg-white border-b border-[#E5E5E5]">
         <div className="max-w-[1600px] w-full mx-auto flex flex-col items-center text-center">
-          <p className="text-[#111111] text-xs font-bold tracking-[0.4em] mb-12 uppercase">
+          <p className="text-[#111111] text-xs font-bold tracking-[0.4em] mb-12 normal-case">
             FileNotFound
           </p>
           <h1 className="text-6xl md:text-7xl lg:text-9xl font-extrabold text-[#111111] tracking-tighter leading-[0.85] mb-10 uppercase">
@@ -240,7 +240,7 @@ export const UploadPage: React.FC = () => {
             Process
           </p>
           <h2 className="text-3xl md:text-5xl font-extrabold text-[#111111] tracking-tight text-center mb-20 md:mb-32 uppercase">
-            HOW FILENOTFOUND WORKS
+            HOW <span className="normal-case">FileNotFound</span> WORKS
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-4 gap-px bg-[#E5E5E5] border border-[#E5E5E5]">

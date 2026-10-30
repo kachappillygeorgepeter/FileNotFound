@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { SessionProvider } from './context/SessionContext';
@@ -10,6 +10,7 @@ import { SecurityPage } from './pages/SecurityPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
+import { InitialLoadingScreen } from './components/ui/InitialLoadingScreen';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -21,10 +22,33 @@ const queryClient = new QueryClient({
   },
 });
 
+const SESSION_LOADED_KEY = 'fnf_initial_loaded';
+
 export const App: React.FC = () => {
+  // Check sessionStorage so loading is only shown once on initial entry, never on refresh
+  const [initialLoading, setInitialLoading] = useState<boolean>(() => {
+    try {
+      return !sessionStorage.getItem(SESSION_LOADED_KEY);
+    } catch {
+      return false;
+    }
+  });
+
+  const handleLoadingComplete = () => {
+    try {
+      sessionStorage.setItem(SESSION_LOADED_KEY, 'true');
+    } catch {
+      // Ignore storage errors in restricted iframe/private contexts
+    }
+    setInitialLoading(false);
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
       <SessionProvider>
+        {initialLoading && (
+          <InitialLoadingScreen onComplete={handleLoadingComplete} />
+        )}
         <BrowserRouter>
           <Routes>
             <Route element={<RootLayout />}>
