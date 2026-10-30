@@ -1,0 +1,32 @@
+import React from 'react';
+import { Link } from 'react-router-dom';
+import logoImg from '../../../imgs/logo_no_bg.png';
+
+export const Footer: React.FC = () => {
+  return (
+    <footer className="bg-white border-t border-[#E5E5E5] py-12 px-6 md:px-12 flex flex-col md:flex-row justify-between items-center text-[#555555] text-xs font-semibold tracking-widest uppercase gap-6">
+      <div className="flex items-center gap-3">
+        <img src={logoImg} alt="FileNotFound Logo" className="h-6 w-6 object-contain" />
+        <span className="text-[#111111] font-bold">FileNotFound</span>
+        <span className="text-[#E5E5E5]">|</span>
+        <span>© {new Date().getFullYear()} ALL RIGHTS RESERVED</span>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-6 text-[10px] tracking-[0.2em]">
+        <Link to="/security" className="hover:text-[#111111] transition-colors">
+          SECURITY
+        </Link>
+        <Link to="/privacy" className="hover:text-[#111111] transition-colors">
+          PRIVACY
+        </Link>
+        <Link to="/terms" className="hover:text-[#111111] transition-colors">
+          TERMS
+        </Link>
+      </div>
+
+      <div className="text-[10px] tracking-widest text-[#999999]">
+        ZERO-TRUST TEMPORARY FILE TRANSFER
+      </div>
+    </footer>
+  );
+};

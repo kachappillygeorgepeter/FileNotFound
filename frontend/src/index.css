@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #ffffff;
+    --foreground: #111111;
+  }
+
+  body {
+    background-color: #ffffff;
+    color: #111111;
+    font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, Arial, Helvetica, sans-serif;
+    overflow-x: hidden;
+  }
+
+  /* Monochromatic selection */
+  ::selection {
+    background-color: #111111;
+    color: #ffffff;
+  }
+
+  /* Subtle minimal scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #ffffff;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #E5E5E5;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: #111111;
+  }
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
