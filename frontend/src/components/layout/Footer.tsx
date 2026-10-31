@@ -13,9 +13,6 @@ export const Footer: React.FC = () => {
       </div>
 
       <div className="flex flex-wrap items-center gap-6 text-[10px] tracking-[0.2em]">
-        <Link to="/security" className="hover:text-[#111111] transition-colors">
-          SECURITY
-        </Link>
         <Link to="/privacy" className="hover:text-[#111111] transition-colors">
           PRIVACY
         </Link>

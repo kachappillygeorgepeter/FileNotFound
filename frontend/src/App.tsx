@@ -6,7 +6,6 @@ import { RootLayout } from './components/layout/RootLayout';
 import { UploadPage } from './pages/UploadPage';
 import { ShareCreatedPage } from './pages/ShareCreatedPage';
 import { ReceiverPage } from './pages/ReceiverPage';
-import { SecurityPage } from './pages/SecurityPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -56,7 +55,6 @@ export const App: React.FC = () => {
               <Route path="/share-created" element={<ShareCreatedPage />} />
               <Route path="/s/:token" element={<ReceiverPage />} />
               <Route path="/share/:token" element={<ReceiverPage />} />
-              <Route path="/security" element={<SecurityPage />} />
               <Route path="/privacy" element={<PrivacyPage />} />
               <Route path="/terms" element={<TermsPage />} />
               <Route path="/404" element={<NotFoundPage />} />

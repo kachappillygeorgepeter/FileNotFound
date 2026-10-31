@@ -3,7 +3,7 @@ import { ApiErrorResponse } from '../types/api';
 
 // Create dedicated Axios client instance
 export const apiClient: AxiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL || '',
+  baseURL: import.meta.env.VITE_API_BASE_URL || (import.meta.env.PROD ? 'https://file-not-found-omega.vercel.app' : ''),
   withCredentials: true, // Needed for HTTP-only access_session_token cookie
   timeout: 60000, // 60s timeout for large uploads
 });

@@ -12,6 +12,12 @@
 
 A production-grade, zero-trust temporary file transfer platform built with **React 19, Vite, Node.js, Express, TypeScript, PostgreSQL, and Prisma**. Designed to guarantee strict download limits, hard cryptographic isolation, atomic race-condition defense, and physical data destruction upon expiration or quota exhaustion.
 
+> [!IMPORTANT]
+> ### 🌐 Live Production Deployments
+> - **Frontend Application:** [https://file-not-found-xt4i.vercel.app](https://file-not-found-xt4i.vercel.app/)
+> - **Backend API Gateway:** [https://file-not-found-omega.vercel.app](https://file-not-found-omega.vercel.app/)
+> - **Backend Health Check:** [https://file-not-found-omega.vercel.app/api/health](https://file-not-found-omega.vercel.app/api/health)
+
 ---
 
 ## 📑 Table of Contents
@@ -364,7 +370,7 @@ FileNotFound/
    ```env
    PORT=4000
    DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/filetransfer?schema=public"
-   CLIENT_ORIGIN=http://localhost:5180
+   CLIENT_ORIGIN=https://file-not-found-xt4i.vercel.app,http://localhost:5180
    UPLOAD_DIR=./uploads
    MAX_FILE_SIZE_MB=100
    ```
@@ -393,7 +399,7 @@ FileNotFound/
 2. Verify or create your `frontend/.env` file:
    ```env
    # Leave empty to utilize local Vite dev server proxy (/api -> http://localhost:4000)
-   VITE_API_BASE_URL=
+   VITE_API_BASE_URL=https://file-not-found-omega.vercel.app
 
    # Set to false to communicate directly with the live backend
    VITE_USE_MOCK=false

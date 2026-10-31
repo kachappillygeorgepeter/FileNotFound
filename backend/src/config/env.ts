@@ -3,9 +3,11 @@ import { z } from 'zod';
 
 dotenv.config();
 
-const defaultClientOrigin = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : 'http://localhost:5180';
+const defaultClientOrigin =
+  process.env.CLIENT_ORIGIN ||
+  (process.env.NODE_ENV === 'production' || process.env.VERCEL
+    ? 'https://file-not-found-xt4i.vercel.app'
+    : 'http://localhost:5180');
 
 const defaultUploadDir = process.env.VERCEL ? '/tmp/uploads' : './uploads';
 
