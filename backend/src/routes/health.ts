@@ -10,7 +10,7 @@ healthRouter.get('/health', async (_req: Request, res: Response) => {
     // Check database connection by executing a simple raw query
     await prisma.$queryRaw`SELECT 1`;
     dbStatus = 'connected';
-  } catch (error) {
+  } catch {
     dbStatus = 'error';
   }
 

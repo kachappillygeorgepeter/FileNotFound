@@ -13,6 +13,7 @@ export function sanitizeFilename(filename: string): string {
   let base = path.basename(filename).trim();
 
   // 2. Strip null bytes and control characters (ASCII 0-31 and 127)
+  // eslint-disable-next-line no-control-regex
   base = base.replace(/[\x00-\x1F\x7F]/g, '');
 
   // 3. Remove characters illegal in file systems and HTTP headers (\ / : * ? " < > | `)

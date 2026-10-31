@@ -17,9 +17,10 @@ export function createApp(): Express {
   app.use(helmet());
 
   // Strict & flexible CORS policy
+  const configuredOrigins = config.CLIENT_ORIGIN.split(',').map((o) => o.trim());
   const allowedOrigins = Array.from(
     new Set([
-      config.CLIENT_ORIGIN,
+      ...configuredOrigins,
       'http://localhost:5180',
       'http://localhost:5173',
       'http://127.0.0.1:5180',
@@ -29,7 +30,17 @@ export function createApp(): Express {
 
   app.use(
     cors({
-      origin: allowedOrigins,
+      origin: (origin, callback) => {
+        if (!origin) return callback(null, true);
+        if (
+          allowedOrigins.includes(origin) ||
+          (Boolean(process.env.VERCEL) && origin.endsWith('.vercel.app')) ||
+          /^http:\/\/(localhost|127\.0\.0\.1):\d+$/.test(origin)
+        ) {
+          return callback(null, true);
+        }
+        callback(new Error('Origin not allowed by CORS'));
+      },
       credentials: true,
     })
   );

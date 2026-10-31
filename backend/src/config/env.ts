@@ -3,6 +3,12 @@ import { z } from 'zod';
 
 dotenv.config();
 
+const defaultClientOrigin = process.env.VERCEL_URL
+  ? `https://${process.env.VERCEL_URL}`
+  : 'http://localhost:5180';
+
+const defaultUploadDir = process.env.VERCEL ? '/tmp/uploads' : './uploads';
+
 const envSchema = z.object({
   PORT: z
     .string()
@@ -10,8 +16,10 @@ const envSchema = z.object({
     .transform((val) => parseInt(val, 10))
     .pipe(z.number().positive()),
   DATABASE_URL: z.string().url('DATABASE_URL must be a valid URL'),
-  CLIENT_ORIGIN: z.string().url('CLIENT_ORIGIN must be a valid URL'),
-  UPLOAD_DIR: z.string().default('./uploads'),
+  CLIENT_ORIGIN: z
+    .string()
+    .default(defaultClientOrigin),
+  UPLOAD_DIR: z.string().default(defaultUploadDir),
   MAX_FILE_SIZE_MB: z
     .string()
     .default('100')

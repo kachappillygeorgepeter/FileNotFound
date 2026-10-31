@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { AllowedExpiryOption, isValidExpiryOption } from '../utils/index.js';
+import { AllowedExpiryOption } from '../utils/index.js';
 
 export const allowedExpiryValues: [AllowedExpiryOption, ...AllowedExpiryOption[]] = [
   '10m',

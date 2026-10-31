@@ -10,6 +10,7 @@ export type ResolvedShare = Share & {
 export const GENERIC_SHARE_NOT_FOUND_MSG = 'Share not found or no longer available.';
 
 // Extend Express Request type
+/* eslint-disable @typescript-eslint/no-namespace */
 declare global {
   namespace Express {
     interface Request {
