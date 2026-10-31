@@ -109,19 +109,19 @@ export const UploadPage: React.FC = () => {
   return (
     <div className="w-full min-h-screen bg-white select-none">
       {/* 1. MAIN HERO */}
-      <section className="w-full min-h-[85vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 relative bg-white border-b border-[#E5E5E5]">
-        <div className="max-w-[1600px] w-full mx-auto flex flex-col items-center text-center">
+      <section className="hero-section w-full min-h-[85vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 relative bg-white border-b border-[#E5E5E5]">
+        <div className="hero-container max-w-[1600px] w-full mx-auto flex flex-col items-center text-center">
           <p className="text-[#111111] text-xs font-bold tracking-[0.4em] mb-12 normal-case">
             FileNotFound
           </p>
-          <h1 className="text-6xl md:text-7xl lg:text-9xl font-extrabold text-[#111111] tracking-tighter leading-[0.85] mb-10 uppercase">
+          <h1 className="hero-title text-6xl md:text-7xl lg:text-9xl font-extrabold text-[#111111] tracking-tighter leading-[0.85] mb-10 uppercase">
             YOUR FILES.<br />YOUR RULES.
           </h1>
-          <p className="text-[#555555] text-lg md:text-xl font-medium tracking-wide max-w-xl mb-16 leading-relaxed">
+          <p className="hero-subtitle text-[#555555] text-lg md:text-xl font-medium tracking-wide max-w-xl mb-16 leading-relaxed">
             Share files securely with links that expire automatically and access limits you control.
           </p>
 
-          <div className="flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
+          <div className="hero-actions flex flex-col sm:flex-row items-center gap-6 w-full sm:w-auto">
             <button
               type="button"
               onClick={scrollToUpload}
@@ -146,7 +146,7 @@ export const UploadPage: React.FC = () => {
       <section id="upload-section" className="py-12 px-6 max-w-[1600px] mx-auto scroll-mt-24">
         <form
           onSubmit={handleUploadSubmit}
-          className="max-w-3xl mx-auto bg-white p-10 md:p-14 border border-[#E5E5E5] shadow-sm text-left"
+          className="upload-form-card max-w-3xl mx-auto bg-white p-10 md:p-14 border border-[#E5E5E5] shadow-sm text-left"
         >
           <p className="text-[#555555] text-xs font-bold tracking-[0.25em] mb-2 uppercase">
             File Staging
@@ -203,7 +203,7 @@ export const UploadPage: React.FC = () => {
                 />
 
                 {/* Submit Action Button */}
-                <div className="flex flex-col-reverse sm:flex-row justify-end gap-4 pt-10 mt-8 border-t border-[#E5E5E5]">
+                <div className="upload-form-actions flex flex-col-reverse sm:flex-row justify-end gap-4 pt-10 mt-8 border-t border-[#E5E5E5]">
                   <button
                     type="button"
                     onClick={handleClearAll}
@@ -243,7 +243,7 @@ export const UploadPage: React.FC = () => {
             HOW <span className="normal-case">FileNotFound</span> WORKS
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-px bg-[#E5E5E5] border border-[#E5E5E5]">
+          <div className="process-matrix-grid grid grid-cols-1 md:grid-cols-4 gap-px bg-[#E5E5E5] border border-[#E5E5E5]">
             {[
               {
                 num: '01',
@@ -296,7 +296,7 @@ export const UploadPage: React.FC = () => {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-16 gap-x-12">
+        <div className="security-guarantees-grid grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-16 gap-x-12">
           {[
             {
               title: 'ZERO RAW TOKEN PERSISTENCE',
@@ -334,8 +334,8 @@ export const UploadPage: React.FC = () => {
       </section>
 
       {/* 5. CALL TO ACTION SECTION (whereInVIT Night Black #0D0D0D CTA) */}
-      <section className="py-32 md:py-48 bg-[#0D0D0D] text-white text-center px-6 border-t border-[#111111]">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-24 md:gap-12">
+      <section className="cta-section py-32 md:py-48 bg-[#0D0D0D] text-white text-center px-6 border-t border-[#111111]">
+        <div className="cta-container max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-24 md:gap-12">
           <div className="flex-1 text-left">
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 uppercase">
               SENDING FILES?
@@ -352,7 +352,7 @@ export const UploadPage: React.FC = () => {
             </button>
           </div>
 
-          <div className="w-full md:w-px h-px md:h-64 bg-white/20" />
+          <div className="cta-divider w-full md:w-px h-px md:h-64 bg-white/20" />
 
           <div className="flex-1 text-left md:pl-12">
             <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 uppercase">
@@ -362,10 +362,10 @@ export const UploadPage: React.FC = () => {
               Enter your authorized link and passkey to initiate atomic file retrieval.
             </p>
             <Link
-              to="/security"
+              to="/privacy"
               className="inline-block bg-white text-[#111111] px-10 py-5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] hover:scale-105 transition-all rounded-none shadow-[0_0_40px_rgba(255,255,255,0.1)]"
             >
-              SECURITY DETAILS
+              PRIVACY & POLICY
             </Link>
           </div>
         </div>
