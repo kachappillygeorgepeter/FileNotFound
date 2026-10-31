@@ -1,3 +1,9 @@
+<p align="center">
+  <a href="https://file-not-found-xt4i.vercel.app/">
+    <img src="imgs/banner.png" alt="FileNotFound Banner" width="100%" />
+  </a>
+</p>
+
 # 🛡️ FileNotFound — Zero-Trust Temporary File Transfer System
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
