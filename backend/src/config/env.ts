@@ -1,5 +1,7 @@
 import dotenv from 'dotenv';
 import { z } from 'zod';
+import os from 'node:os';
+import path from 'node:path';
 
 dotenv.config();
 
@@ -9,7 +11,17 @@ const defaultClientOrigin =
     ? 'https://file-not-found-xt4i.vercel.app'
     : 'http://localhost:5180');
 
-const defaultUploadDir = process.env.VERCEL ? '/tmp/uploads' : './uploads';
+const isCloudOrServerless = Boolean(
+  process.env.VERCEL ||
+  process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  process.env.LAMBDA_TASK_ROOT ||
+  process.env.NODE_ENV === 'production'
+);
+
+const defaultUploadDir = isCloudOrServerless
+  ? path.join(os.tmpdir(), 'uploads')
+  : './uploads';
+
 const defaultDatabaseUrl =
   process.env.DATABASE_URL ||
   'postgresql://postgres:postgres@localhost:5432/filetransfer?schema=public';
