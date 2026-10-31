@@ -110,7 +110,9 @@ export async function createMockShare(
     createdAt: new Date(),
   });
 
-  const origin = window.location.origin;
+  const publicOrigin = 'https://file-not-found-xt4i.vercel.app';
+  const isLocal = typeof window !== 'undefined' && /localhost|127\.0\.0\.1/.test(window.location.origin);
+  const origin = isLocal ? publicOrigin : (window?.location?.origin || publicOrigin);
   const shareLink = `${origin}/s/${token}`;
 
   return {

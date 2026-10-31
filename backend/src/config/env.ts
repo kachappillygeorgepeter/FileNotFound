@@ -5,12 +5,6 @@ import path from 'node:path';
 
 dotenv.config();
 
-const defaultClientOrigin =
-  process.env.CLIENT_ORIGIN ||
-  (process.env.NODE_ENV === 'production' || process.env.VERCEL
-    ? 'https://file-not-found-xt4i.vercel.app'
-    : 'http://localhost:5180');
-
 const isCloudOrServerless = Boolean(
   process.env.VERCEL ||
   process.env.AWS_LAMBDA_FUNCTION_NAME ||
@@ -18,9 +12,19 @@ const isCloudOrServerless = Boolean(
   process.env.NODE_ENV === 'production'
 );
 
+const defaultClientOrigin =
+  process.env.CLIENT_ORIGIN ||
+  (isCloudOrServerless
+    ? 'https://file-not-found-xt4i.vercel.app'
+    : 'http://localhost:5180');
+
+const defaultPublicAppUrl =
+  process.env.PUBLIC_APP_URL || 'https://file-not-found-xt4i.vercel.app';
+
+// In serverless/cloud environments, local disk is read-only except /tmp
 const defaultUploadDir = isCloudOrServerless
   ? path.join(os.tmpdir(), 'uploads')
-  : './uploads';
+  : (process.env.UPLOAD_DIR || './uploads');
 
 const defaultDatabaseUrl =
   process.env.DATABASE_URL ||
@@ -34,7 +38,11 @@ const envSchema = z.object({
     .pipe(z.number().positive()),
   DATABASE_URL: z.string().default(defaultDatabaseUrl),
   CLIENT_ORIGIN: z.string().default(defaultClientOrigin),
-  UPLOAD_DIR: z.string().default(defaultUploadDir),
+  PUBLIC_APP_URL: z.string().default(defaultPublicAppUrl),
+  UPLOAD_DIR: z
+    .string()
+    .default(defaultUploadDir)
+    .transform((val) => (isCloudOrServerless ? path.join(os.tmpdir(), 'uploads') : val)),
   MAX_FILE_SIZE_MB: z
     .string()
     .default('100')
@@ -62,6 +70,7 @@ export const config = parsed.success
       PORT: 4000,
       DATABASE_URL: defaultDatabaseUrl,
       CLIENT_ORIGIN: defaultClientOrigin,
+      PUBLIC_APP_URL: defaultPublicAppUrl,
       UPLOAD_DIR: defaultUploadDir,
       MAX_FILE_SIZE_MB: 100,
       NODE_ENV: (process.env.NODE_ENV as 'development' | 'production' | 'test') || 'development',

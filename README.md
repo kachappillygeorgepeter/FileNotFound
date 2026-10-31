@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# 🛡️ FileNotFound — Zero-Trust Temporary File Transfer System
+# FileNotFound — Zero-Trust Temporary File Transfer System
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-19.0-61dafb?logo=react&logoColor=black)](https://react.dev/)
@@ -19,7 +19,9 @@
 A production-grade, zero-trust temporary file transfer platform built with **React 19, Vite, Node.js, Express, TypeScript, PostgreSQL, and Prisma**. Designed to guarantee strict download limits, hard cryptographic isolation, atomic race-condition defense, and physical data destruction upon expiration or quota exhaustion.
 
 > [!IMPORTANT]
+>
 > ### 🌐 Live Production Deployments
+>
 > - **Frontend Application:** [https://file-not-found-xt4i.vercel.app](https://file-not-found-xt4i.vercel.app/)
 > - **Backend API Gateway:** [https://file-not-found-omega.vercel.app](https://file-not-found-omega.vercel.app/)
 > - **Backend Health Check:** [https://file-not-found-omega.vercel.app/api/health](https://file-not-found-omega.vercel.app/api/health)
@@ -27,6 +29,7 @@ A production-grade, zero-trust temporary file transfer platform built with **Rea
 ---
 
 ## 📑 Table of Contents
+
 1. [Architectural Overview](#-architectural-overview)
 2. [Key Security & Cryptographic Guarantees](#-key-security--cryptographic-guarantees)
 3. [End-to-End Cryptographic Workflow](#-end-to-end-cryptographic-workflow)
@@ -100,16 +103,16 @@ flowchart TD
 
 ## 🔒 Key Security & Cryptographic Guarantees
 
-| Guarantee | Mechanism | Threat Prevented |
-| :--- | :--- | :--- |
-| **Zero Raw Token Storage** | Only SHA-256 deterministic hashes (`tokenHash`) are stored in PostgreSQL. Raw 256-bit entropy tokens exist only in client URLs. | **Database breach leakage**: Even a full database dump yields zero usable download links. |
-| **Atomic Quota Enforcement** | Single-statement conditional query: `UPDATE "Share" SET "downloadsUsed" = "downloadsUsed" + 1 WHERE "downloadsUsed" < "maxDownloads"`. | **Concurrency race conditions**: Competing simultaneous requests cannot exceed download limits (1, 3, or 10). |
-| **Reservation Before Bytes** | The database row-level slot decrement commits *before* streaming any byte to the receiver. | **Network cutoff exploitation**: Disconnecting during a download consumes the attempt and cannot be exploited. |
-| **Zero-Knowledge Metadata** | Protected shares return `{ "passwordRequired": true }` with no file names, counts, sizes, or expiration timestamps. | **Metadata eavesdropping**: Unauthorized users learn nothing about shared contents without the passkey. |
-| **Two-Tier Expiry** | Synchronous database timestamp check (`expiresAt > NOW()`) on every request + scheduled background file shredder (`node-cron`). | **Expired access windows**: Access is blocked to the exact millisecond, without relying on background timer accuracy. |
-| **Path Traversal Elimination** | Files are stored under random UUID filenames outside public web roots and accessed exclusively by database IDs. | **Directory traversal (`../../`)**: Malicious filenames cannot escape storage directories or overwrite system files. |
-| **Adaptive Slow Password Hash** | Passwords are salted and hashed using `bcryptjs` with work factor 12 (~250ms per check). | **Dictionary & Rainbow Table attacks**: Brute-force guessing attacks are computationally infeasible. |
-| **Timing Attack Mitigation** | Secret comparisons utilize `crypto.timingSafeEqual` with normalized dummy executions. | **Side-channel timing analysis**: Character-by-character response time variances are eliminated. |
+| Guarantee                       | Mechanism                                                                                                                              | Threat Prevented                                                                                                      |
+| :------------------------------ | :------------------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------- |
+| **Zero Raw Token Storage**      | Only SHA-256 deterministic hashes (`tokenHash`) are stored in PostgreSQL. Raw 256-bit entropy tokens exist only in client URLs.        | **Database breach leakage**: Even a full database dump yields zero usable download links.                             |
+| **Atomic Quota Enforcement**    | Single-statement conditional query: `UPDATE "Share" SET "downloadsUsed" = "downloadsUsed" + 1 WHERE "downloadsUsed" < "maxDownloads"`. | **Concurrency race conditions**: Competing simultaneous requests cannot exceed download limits (1, 3, or 10).         |
+| **Reservation Before Bytes**    | The database row-level slot decrement commits _before_ streaming any byte to the receiver.                                             | **Network cutoff exploitation**: Disconnecting during a download consumes the attempt and cannot be exploited.        |
+| **Zero-Knowledge Metadata**     | Protected shares return `{ "passwordRequired": true }` with no file names, counts, sizes, or expiration timestamps.                    | **Metadata eavesdropping**: Unauthorized users learn nothing about shared contents without the passkey.               |
+| **Two-Tier Expiry**             | Synchronous database timestamp check (`expiresAt > NOW()`) on every request + scheduled background file shredder (`node-cron`).        | **Expired access windows**: Access is blocked to the exact millisecond, without relying on background timer accuracy. |
+| **Path Traversal Elimination**  | Files are stored under random UUID filenames outside public web roots and accessed exclusively by database IDs.                        | **Directory traversal (`../../`)**: Malicious filenames cannot escape storage directories or overwrite system files.  |
+| **Adaptive Slow Password Hash** | Passwords are salted and hashed using `bcryptjs` with work factor 12 (~250ms per check).                                               | **Dictionary & Rainbow Table attacks**: Brute-force guessing attacks are computationally infeasible.                  |
+| **Timing Attack Mitigation**    | Secret comparisons utilize `crypto.timingSafeEqual` with normalized dummy executions.                                                  | **Side-channel timing analysis**: Character-by-character response time variances are eliminated.                      |
 
 ---
 
@@ -211,7 +214,7 @@ Shares self-destruct through an intentional two-tier process: instant synchronou
 ```mermaid
 stateDiagram-v2
     [*] --> Active: Files Staged & Share Created
-    
+
     state Active {
         [*] --> Accessible
         Accessible --> Accessible: Valid Download (Quota Remaining)
@@ -253,7 +256,7 @@ sequenceDiagram
     Note over Req1,Req2: Simultaneous Arrival at t = 0.000s
     Req1->>PG: UPDATE "Share" SET "downloadsUsed" = "downloadsUsed" + 1 WHERE "downloadsUsed" < 1
     Req2->>PG: UPDATE "Share" SET "downloadsUsed" = "downloadsUsed" + 1 WHERE "downloadsUsed" < 1
-    
+
     Note over PG: PostgreSQL row-level lock evaluates queries sequentially
     PG-->>Req1: 1 row affected (Success - Slot Reserved)
     PG-->>Req2: 0 rows affected (Condition Failed: downloadsUsed is now 1)
@@ -360,19 +363,23 @@ FileNotFound/
 ## 🚀 Quick Start & Local Setup
 
 ### 1. Prerequisites
+
 - **Node.js**: v20.x or v24.x LTS installed
 - **PostgreSQL 16**: Running locally (e.g. port 5432) or via Docker
 
 ---
 
 ### 2. Backend Setup
+
 1. Open a terminal and navigate to the backend directory:
+
    ```bash
    cd backend
    npm install
    ```
 
 2. Create your `.env` configuration file:
+
    ```env
    PORT=4000
    DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/filetransfer?schema=public"
@@ -380,9 +387,11 @@ FileNotFound/
    UPLOAD_DIR=./uploads
    MAX_FILE_SIZE_MB=100
    ```
-   *(Note: If your database password contains characters like `#` or `@`, URL-encode them: `#` $\rightarrow$ `%23`)*
+
+   _(Note: If your database password contains characters like `#` or `@`, URL-encode them: `#` $\rightarrow$ `%23`)_
 
 3. Run the database migrations:
+
    ```bash
    npx prisma migrate dev
    ```
@@ -396,13 +405,16 @@ FileNotFound/
 ---
 
 ### 3. Frontend Setup
+
 1. Open a second terminal and navigate to the frontend directory:
+
    ```bash
    cd frontend
    npm install
    ```
 
 2. Verify or create your `frontend/.env` file:
+
    ```env
    # Leave empty to utilize local Vite dev server proxy (/api -> http://localhost:4000)
    VITE_API_BASE_URL=https://file-not-found-omega.vercel.app
@@ -421,15 +433,15 @@ FileNotFound/
 
 ## 🔌 API Specification & Endpoints
 
-| Method | Endpoint | Description | Rate Limit |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/health` | Service & PostgreSQL connectivity check (`SELECT 1`) | 100 req / 15m |
-| `POST` | `/api/shares` | Multi-file upload and rule configuration | 10 req / 15m |
-| `GET` | `/api/shares/:token` | Share resolution (returns `{ passwordRequired: true }` if locked) | 100 req / 15m |
-| `POST` | `/api/shares/:token/verify` | Password verification & 5-minute session issuance | 5 attempts / 15m |
-| `GET` | `/api/shares/:token/metadata` | Protected file metadata (requires session header/cookie) | 100 req / 15m |
-| `GET` | `/api/shares/:token/files/:fileId/download` | Atomic single-file download stream | 100 req / 15m |
-| `GET` | `/api/shares/:token/download-all` | Atomic dynamic ZIP streaming for all files | 100 req / 15m |
+| Method | Endpoint                                    | Description                                                       | Rate Limit       |
+| :----- | :------------------------------------------ | :---------------------------------------------------------------- | :--------------- |
+| `GET`  | `/api/health`                               | Service & PostgreSQL connectivity check (`SELECT 1`)              | 100 req / 15m    |
+| `POST` | `/api/shares`                               | Multi-file upload and rule configuration                          | 10 req / 15m     |
+| `GET`  | `/api/shares/:token`                        | Share resolution (returns `{ passwordRequired: true }` if locked) | 100 req / 15m    |
+| `POST` | `/api/shares/:token/verify`                 | Password verification & 5-minute session issuance                 | 5 attempts / 15m |
+| `GET`  | `/api/shares/:token/metadata`               | Protected file metadata (requires session header/cookie)          | 100 req / 15m    |
+| `GET`  | `/api/shares/:token/files/:fileId/download` | Atomic single-file download stream                                | 100 req / 15m    |
+| `GET`  | `/api/shares/:token/download-all`           | Atomic dynamic ZIP streaming for all files                        | 100 req / 15m    |
 
 ---
 
@@ -456,6 +468,7 @@ npm test
 ```
 
 ### Coverage Highlights:
+
 - **Entropy & Tokens**: Validates 256 bits of CSPRNG entropy from `crypto.randomBytes(32)` in base64url format.
 - **Race Condition Resistance**: Fires 10 concurrent requests simultaneously against a 1-download limit; exactly 1 succeeds and 9 receive 404/410.
 - **Zero Information Disclosure**: Ensures unauthenticated responses for protected shares never contain file counts, file names, sizes, or expiration timestamps.
@@ -465,4 +478,5 @@ npm test
 ---
 
 ## 📄 License
+
 This project is licensed under the [MIT License](LICENSE).

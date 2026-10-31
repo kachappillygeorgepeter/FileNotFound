@@ -53,7 +53,17 @@ export async function createShareController(req: Request, res: Response): Promis
       mimeType: f.mimetype,
     }));
 
-    const clientOrigin = (req.headers.origin as string) || config.CLIENT_ORIGIN;
+    // Generate real public production link by default so it can be shared anywhere.
+    // If request comes from an external public domain (not localhost), use that.
+    // If USE_LOCAL_SHARE_LINKS is explicitly 'true', allow localhost links for local testing.
+    const originHeader = req.headers.origin as string | undefined;
+    const publicAppUrl = config.PUBLIC_APP_URL.replace(/\/$/, '');
+    const isLocalhost = !originHeader || /localhost|127\.0\.0\.1/i.test(originHeader);
+    const allowLocal = process.env.USE_LOCAL_SHARE_LINKS === 'true';
+
+    const clientOrigin = (!isLocalhost && originHeader)
+      ? originHeader.replace(/\/$/, '')
+      : (allowLocal && originHeader ? originHeader.replace(/\/$/, '') : publicAppUrl);
 
     const result = await createShareService(
       validation.data,
@@ -65,6 +75,7 @@ export async function createShareController(req: Request, res: Response): Promis
       fileCount: result.fileCount,
       maxDownloads: result.maxDownloads,
       expiresAt: result.expiresAt,
+      shareLink: result.shareLink,
     });
 
     // Return strictly what the sender needs (no database IDs, no passwords, no stored paths)

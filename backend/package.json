@@ -11,7 +11,9 @@
     "start": "node dist/server.js",
     "lint": "eslint src",
     "format": "prettier --write \"src/**/*.ts\"",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:check": "node scripts/checkDb.cjs",
+    "db:verify": "node scripts/verifyUpload.cjs"
   },
   "keywords": [],
   "author": "",

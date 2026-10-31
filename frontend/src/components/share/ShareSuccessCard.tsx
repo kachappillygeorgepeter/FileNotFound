@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Check, Copy } from 'lucide-react';
+import { Check, Copy, Globe } from 'lucide-react';
 import { CreateShareResponse } from '../../types/share';
 import { formatDate } from '../../utils/formatters';
 import { Button } from '../ui/Button';
@@ -19,9 +19,28 @@ export const ShareSuccessCard: React.FC<ShareSuccessCardProps> = ({
   const [copiedLink, setCopiedLink] = useState(false);
   const [copiedPasskey, setCopiedPasskey] = useState(false);
 
+  const PUBLIC_APP_URL = 'https://file-not-found-xt4i.vercel.app';
+
+  // Normalize share link: ensure it is always a real, publicly accessible link
+  const publicShareLink = useMemo(() => {
+    if (!shareData.shareLink) return '';
+    try {
+      const parsed = new URL(shareData.shareLink);
+      if (parsed.hostname === 'localhost' || parsed.hostname === '127.0.0.1') {
+        return `${PUBLIC_APP_URL}${parsed.pathname}${parsed.search}${parsed.hash}`;
+      }
+      return shareData.shareLink;
+    } catch {
+      return shareData.shareLink.replace(
+        /^https?:\/\/(localhost|127\.0\.0\.1)(:\d+)?/i,
+        PUBLIC_APP_URL
+      );
+    }
+  }, [shareData.shareLink]);
+
   const handleCopyLink = async () => {
     try {
-      await navigator.clipboard.writeText(shareData.shareLink);
+      await navigator.clipboard.writeText(publicShareLink);
       setCopiedLink(true);
       setTimeout(() => setCopiedLink(false), 2500);
     } catch (e) {
@@ -42,16 +61,20 @@ export const ShareSuccessCard: React.FC<ShareSuccessCardProps> = ({
 
   return (
     <div className="max-w-3xl mx-auto bg-white p-10 md:p-14 border border-[#E5E5E5] my-12 text-left shadow-sm">
-      <p className="text-[#111111] text-xs font-bold tracking-[0.4em] mb-4 uppercase">
-        Zero-Trust Link Generated
-      </p>
+      <div className="flex items-center gap-2 mb-4">
+        <Globe className="w-3.5 h-3.5 text-[#111111]" />
+        <p className="text-[#111111] text-xs font-bold tracking-[0.4em] uppercase">
+          Zero-Trust Public Link Generated
+        </p>
+      </div>
+
       <h1 className="text-3xl font-extrabold mb-8 text-[#111111] uppercase tracking-tight">
         Share Created Successfully
       </h1>
 
       <div className="bg-[#111111] text-white p-4 mb-8 text-sm font-semibold tracking-wide flex items-center">
         <span className="mr-3 font-bold uppercase tracking-[0.2em] text-[10px] bg-white text-[#111111] px-2 py-1">
-          SUCCESS
+          LIVE
         </span>
         Your files are staged in private storage and ready for secure recipient retrieval.
       </div>
@@ -59,12 +82,18 @@ export const ShareSuccessCard: React.FC<ShareSuccessCardProps> = ({
       <div className="space-y-8">
         {/* Link Box */}
         <div>
-          <label className="block text-[10px] font-bold tracking-[0.2em] text-[#555555] uppercase mb-2">
-            Share Link
-          </label>
+          <div className="flex items-center justify-between mb-2">
+            <label className="block text-[10px] font-bold tracking-[0.2em] text-[#555555] uppercase">
+              Real Public Share Link
+            </label>
+            <span className="text-[10px] font-bold tracking-wider text-[#111111] bg-[#F0F0EE] px-2 py-0.5 border border-[#E5E5E5]">
+              ACCESSIBLE ANYWHERE
+            </span>
+          </div>
+
           <div className="flex flex-col sm:flex-row items-stretch gap-3">
-            <div className="flex-1 border border-[#E5E5E5] bg-[#F7F7F5] rounded-none px-4 py-4 text-xs font-mono text-[#111111] select-none break-all flex items-center">
-              {shareData.shareLink}
+            <div className="flex-1 border border-[#E5E5E5] bg-[#F7F7F5] rounded-none px-4 py-4 text-xs font-mono text-[#111111] select-all break-all flex items-center">
+              {publicShareLink}
             </div>
             <button
               type="button"
@@ -136,7 +165,7 @@ export const ShareSuccessCard: React.FC<ShareSuccessCardProps> = ({
         {/* Actions Footer */}
         <div className="flex flex-col-reverse sm:flex-row justify-end gap-4 pt-10 border-t border-[#E5E5E5]">
           <a
-            href={shareData.shareLink}
+            href={publicShareLink}
             target="_blank"
             rel="noopener noreferrer"
             className="w-full sm:w-auto"
