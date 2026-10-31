@@ -1,4 +1,4 @@
-import { apiClient, parseApiError } from './api';
+import { apiClient, parseApiError, parseBlobError } from './api';
 import {
   CreateSharePayload,
   CreateShareResponse,
@@ -94,7 +94,7 @@ export async function createShare(
         return mockService.createMockShare(payload, onProgress, abortSignal);
       }
     }
-    const err = parseApiError(error);
+    const err = await parseBlobError(error);
     throw new Error(err.message);
   }
 }
@@ -118,7 +118,7 @@ export async function lookupShare(token: string): Promise<ShareMetadata> {
         return mockService.lookupMockShare(token);
       }
     }
-    const err = parseApiError(error);
+    const err = await parseBlobError(error);
     throw new Error(err.message);
   }
 }
@@ -148,7 +148,7 @@ export async function verifySharePassword(
         return mockService.verifyMockPassword(token, password);
       }
     }
-    const err = parseApiError(error);
+    const err = await parseBlobError(error);
     throw new Error(err.message);
   }
 }
@@ -167,7 +167,7 @@ export async function getProtectedMetadata(token: string): Promise<ShareMetadata
     );
     return response.data;
   } catch (error) {
-    const err = parseApiError(error);
+    const err = await parseBlobError(error);
     throw new Error(err.message);
   }
 }
@@ -213,7 +213,7 @@ export async function downloadSingleFile(
         return mockService.triggerMockFileDownload(token, fileId);
       }
     }
-    const err = parseApiError(error);
+    const err = await parseBlobError(error);
     throw new Error(err.message);
   }
 }
@@ -253,7 +253,7 @@ export async function downloadAllZip(token: string): Promise<void> {
         return mockService.triggerMockDownloadAll(token);
       }
     }
-    const err = parseApiError(error);
+    const err = await parseBlobError(error);
     throw new Error(err.message);
   }
 }

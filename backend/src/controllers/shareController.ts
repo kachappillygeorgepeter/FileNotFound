@@ -53,10 +53,12 @@ export async function createShareController(req: Request, res: Response): Promis
       mimeType: f.mimetype,
     }));
 
+    const clientOrigin = (req.headers.origin as string) || config.CLIENT_ORIGIN;
+
     const result = await createShareService(
       validation.data,
       fileMetadata,
-      config.CLIENT_ORIGIN
+      clientOrigin
     );
 
     logger.info('Share created successfully', {

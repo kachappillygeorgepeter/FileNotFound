@@ -16,10 +16,20 @@ export function createApp(): Express {
   // Security headers with Helmet
   app.use(helmet());
 
-  // Strict CORS policy
+  // Strict & flexible CORS policy
+  const allowedOrigins = Array.from(
+    new Set([
+      config.CLIENT_ORIGIN,
+      'http://localhost:5180',
+      'http://localhost:5173',
+      'http://127.0.0.1:5180',
+      'http://127.0.0.1:5173',
+    ])
+  );
+
   app.use(
     cors({
-      origin: config.CLIENT_ORIGIN,
+      origin: allowedOrigins,
       credentials: true,
     })
   );

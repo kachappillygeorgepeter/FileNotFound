@@ -1,249 +1,456 @@
-# FileNotFound — Zero-Trust Temporary File Transfer System
+# 🛡️ FileNotFound — Zero-Trust Temporary File Transfer System
 
-A high-security, zero-trust temporary file transfer service built with **Node.js, Express, TypeScript, PostgreSQL, and Prisma**. Designed to guarantee strict download limits, hard cryptographic isolation, and physical data destruction upon expiration or exhaustion.
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.8-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-19.0-61dafb?logo=react&logoColor=black)](https://react.dev/)
+[![Node.js](https://img.shields.io/badge/Node.js-v20%20%7C%20v24%20LTS-green?logo=node.js&logoColor=white)](https://nodejs.org/)
+[![Express.js](https://img.shields.io/badge/Express.js-4.21-lightgrey?logo=express&logoColor=black)](https://expressjs.com/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![Prisma ORM](https://img.shields.io/badge/Prisma-5.22-2D3748?logo=prisma&logoColor=white)](https://www.prisma.io/)
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-3.4-38B2AC?logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
+[![Vitest](https://img.shields.io/badge/Vitest-5.0-FCC72B?logo=vitest&logoColor=black)](https://vitest.dev/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
----
-
-## Key Security & Architectural Guarantees
-
-1. **Zero Raw Token Storage**:
-   - Share URLs contain a 32-byte (256-bit entropy) URL-safe random token.
-   - Raw tokens are **never** stored in the database or logs; only deterministic SHA-256 hashes (`tokenHash`) are stored and queried. A database breach never leaks functional links.
-2. **Atomic Download Limits (No Race Conditions)**:
-   - Download slot reservations are executed via a single atomic conditional PostgreSQL query (`UPDATE "Share" SET "downloadsUsed" = "downloadsUsed" + 1 WHERE ...`).
-   - Competing concurrent requests are gated at the database row level; download limits (1, 3, or 10) can **never** be exceeded, even under high concurrency.
-3. **Reservation Before Bytes**:
-   - Download slots are reserved and committed in the database *before* streaming a single byte to the receiver.
-4. **Zero-Knowledge Password Verification**:
-   - Password-protected shares reveal **zero metadata** (no file names, file counts, sizes, or expiration timestamps) until the correct password is provided.
-   - Password verification issues a short-lived (5-minute) access session, storing only its SHA-256 hash in PostgreSQL.
-5. **Request-Time & Background Expiration**:
-   - Expiration and download limits are verified synchronously on every request (invalid/exhausted shares return identical generic `404` errors).
-   - An independent background worker (`node-cron`) physically deletes on-disk files, clears password hashes, purges expired access sessions, and removes disk orphans every 5 minutes.
-6. **Path Traversal Elimination**:
-   - Uploaded files are assigned random UUID stored names with no relationship to original filenames.
-   - Files are stored in a private directory outside web roots and streamed only through database record lookups.
-7. **Structured Zero-Leakage Logging**:
-   - Automated log sanitizer recursively redacts tokens, passwords, session tokens, and file paths.
+A production-grade, zero-trust temporary file transfer platform built with **React 19, Vite, Node.js, Express, TypeScript, PostgreSQL, and Prisma**. Designed to guarantee strict download limits, hard cryptographic isolation, atomic race-condition defense, and physical data destruction upon expiration or quota exhaustion.
 
 ---
 
-## Tech Stack
-
-- **Runtime**: Node.js (v20+ / v24+ LTS)
-- **Language**: TypeScript 5.8+ (Strict mode, ES Modules)
-- **Web Framework**: Express.js
-- **Database**: PostgreSQL 16
-- **ORM & Migrations**: Prisma ORM 5.22
-- **File Uploads**: Multer (disk storage, UUID naming)
-- **Streaming Archives**: Archiver (dynamic ZIP compression)
-- **Validation**: Zod (fail-fast environment and request validation)
-- **Security & Headers**: Helmet, CORS, Cookie-Parser
-- **Rate Limiting**: express-rate-limit
-- **Cryptography & Hashing**: Node `crypto`, `bcryptjs` (work factor 12)
-- **Scheduling**: `node-cron` (non-overlapping worker)
-- **Testing**: Vitest, Supertest
+## 📑 Table of Contents
+1. [Architectural Overview](#-architectural-overview)
+2. [Key Security & Cryptographic Guarantees](#-key-security--cryptographic-guarantees)
+3. [End-to-End Cryptographic Workflow](#-end-to-end-cryptographic-workflow)
+4. [Database Architecture & Entity Relationships](#-database-architecture--entity-relationships)
+5. [Two-Tier Expiration & Self-Destruction Lifecycle](#-two-tier-expiration--self-destruction-lifecycle)
+6. [Atomic Concurrency & Race Condition Defense](#-atomic-concurrency--race-condition-defense)
+7. [Full-Stack Project Structure](#-full-stack-project-structure)
+8. [Quick Start & Local Setup](#-quick-start--local-setup)
+9. [API Specification & Endpoints](#-api-specification--endpoints)
+10. [Automated Testing & Verification](#-automated-testing--verification)
 
 ---
 
-## Project Structure
+## 🏛️ Architectural Overview
+
+FileNotFound is architected with a decoupled frontend and backend, enforcing defense-in-depth across the network, application, and database layers:
+
+```mermaid
+flowchart TD
+    subgraph Client ["Client Layer (Browser)"]
+        A["Sender (Upload Portal)"]
+        B["Receiver (Download Portal)"]
+    end
+
+    subgraph Frontend ["Frontend Service (Port 5180)"]
+        C["Vite Dev Server & Proxy"]
+        D["React 19 UI & Tailwind CSS"]
+        E["Axios Client (x-session-token Interceptor)"]
+    end
+
+    subgraph Gateway ["Express API Gateway (Port 4000)"]
+        F["Helmet (Security Headers)"]
+        G["CORS Policy (Origin Isolation)"]
+        H["Tiered Rate Limiters (Upload & Brute-Force)"]
+        I["Zod Schema Validation (Fail-Fast)"]
+    end
+
+    subgraph Backend ["Core Backend Services"]
+        J["Share Controller & Service"]
+        K["Receiver & Session Controller"]
+        L["Atomic Download Controller"]
+        M["Cleanup Daemon (node-cron Every 5 Min)"]
+    end
+
+    subgraph Storage ["Persistence Layer"]
+        N[("PostgreSQL 16 via Prisma")]
+        O["Private Disk Storage (UUID Stored Files)"]
+    end
+
+    A --> D
+    B --> D
+    D --> E
+    E --> C
+    C -->|"/api requests"| F
+    F --> G
+    G --> H
+    H --> I
+    I --> J
+    I --> K
+    I --> L
+    J --> N
+    J --> O
+    K --> N
+    L --> N
+    L -->|Piped Stream / Dynamic ZIP| B
+    M -->|Physical Shredding & Pruning| N
+    M -->|fs.unlink| O
+```
+
+---
+
+## 🔒 Key Security & Cryptographic Guarantees
+
+| Guarantee | Mechanism | Threat Prevented |
+| :--- | :--- | :--- |
+| **Zero Raw Token Storage** | Only SHA-256 deterministic hashes (`tokenHash`) are stored in PostgreSQL. Raw 256-bit entropy tokens exist only in client URLs. | **Database breach leakage**: Even a full database dump yields zero usable download links. |
+| **Atomic Quota Enforcement** | Single-statement conditional query: `UPDATE "Share" SET "downloadsUsed" = "downloadsUsed" + 1 WHERE "downloadsUsed" < "maxDownloads"`. | **Concurrency race conditions**: Competing simultaneous requests cannot exceed download limits (1, 3, or 10). |
+| **Reservation Before Bytes** | The database row-level slot decrement commits *before* streaming any byte to the receiver. | **Network cutoff exploitation**: Disconnecting during a download consumes the attempt and cannot be exploited. |
+| **Zero-Knowledge Metadata** | Protected shares return `{ "passwordRequired": true }` with no file names, counts, sizes, or expiration timestamps. | **Metadata eavesdropping**: Unauthorized users learn nothing about shared contents without the passkey. |
+| **Two-Tier Expiry** | Synchronous database timestamp check (`expiresAt > NOW()`) on every request + scheduled background file shredder (`node-cron`). | **Expired access windows**: Access is blocked to the exact millisecond, without relying on background timer accuracy. |
+| **Path Traversal Elimination** | Files are stored under random UUID filenames outside public web roots and accessed exclusively by database IDs. | **Directory traversal (`../../`)**: Malicious filenames cannot escape storage directories or overwrite system files. |
+| **Adaptive Slow Password Hash** | Passwords are salted and hashed using `bcryptjs` with work factor 12 (~250ms per check). | **Dictionary & Rainbow Table attacks**: Brute-force guessing attacks are computationally infeasible. |
+| **Timing Attack Mitigation** | Secret comparisons utilize `crypto.timingSafeEqual` with normalized dummy executions. | **Side-channel timing analysis**: Character-by-character response time variances are eliminated. |
+
+---
+
+## ⚡ End-to-End Cryptographic Workflow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Sender as Sender
+    participant Client as Frontend (React 19)
+    participant API as Backend (Express)
+    participant DB as PostgreSQL (Prisma)
+    participant Disk as Private Disk Storage
+    actor Receiver as Receiver
+
+    Note over Sender,API: Phase 1: Upload & Staging
+    Sender->>Client: Select files, TTL (1h), Limit (1), Password
+    Client->>API: POST /api/shares (Multipart/form-data)
+    API->>API: Generate 32-byte CSPRNG token & UUID filenames
+    API->>API: Compute SHA-256(token) & bcrypt(password)
+    API->>Disk: Store files under UUIDs
+    API->>DB: Save Share (tokenHash, passwordHash, expiresAt)
+    API-->>Client: Return raw token in shareLink
+    Client-->>Sender: Display share URL
+
+    Note over Receiver,API: Phase 2: Zero-Knowledge Lookup
+    Receiver->>Client: Open share link (/s/:token)
+    Client->>API: GET /api/shares/:token
+    API->>DB: Query WHERE tokenHash = SHA-256(token)
+    API-->>Client: Return { passwordRequired: true } (Zero metadata leaked)
+    Client-->>Receiver: Render password challenge
+
+    Note over Receiver,API: Phase 3: Authorization & Download
+    Receiver->>Client: Submit password
+    Client->>API: POST /api/shares/:token/verify
+    API->>API: Verify bcrypt(password, passwordHash)
+    API->>DB: Insert AccessSession (5-min TTL)
+    API-->>Client: Return sessionToken & unlocked metadata + Cookie
+    Client-->>Receiver: Display files & download button
+    Receiver->>Client: Click "Download File"
+    Client->>API: GET /api/shares/:token/files/:id/download (with sessionToken)
+    API->>DB: Atomic UPDATE: downloadsUsed = downloadsUsed + 1 WHERE downloadsUsed < maxDownloads
+    alt Reservation Succeeded (Updated 1 row)
+        API->>Disk: Open read stream for UUID file
+        API-->>Receiver: Stream binary bytes directly to browser
+    else Quota Exhausted (Updated 0 rows)
+        API-->>Receiver: Return 404 / 410 Generic Not Found
+    end
+```
+
+---
+
+## 🗄️ Database Architecture & Entity Relationships
+
+The data layer is managed with **PostgreSQL 16** and **Prisma ORM**. All child models enforce `onDelete: Cascade` to ensure complete transactional hygiene without orphaned records.
+
+```mermaid
+erDiagram
+    Share ||--o{ File : "contains (1 to many)"
+    Share ||--o{ AccessSession : "authorizes (1 to many)"
+
+    Share {
+        string id PK "CUID primary key"
+        string tokenHash UK "SHA-256 hash of 32-byte token"
+        string passwordHash "Nullable bcrypt work factor 12 hash"
+        int maxDownloads "Allowed download slots (1, 3, 10)"
+        int downloadsUsed "Atomic reservation counter"
+        datetime expiresAt "Hard self-destruct boundary"
+        datetime createdAt "Creation timestamp"
+        datetime deletedAt "Soft deletion timestamp"
+    }
+
+    File {
+        string id PK "CUID primary key"
+        string shareId FK "Foreign key -> Share.id"
+        string originalName "Sanitized human file name"
+        string storedName UK "UUID on disk"
+        bigint sizeBytes "File size in bytes"
+        string mimeType "MIME type header"
+        string sha256 "Streaming integrity checksum"
+        datetime createdAt "Upload timestamp"
+    }
+
+    AccessSession {
+        string id PK "CUID primary key"
+        string shareId FK "Foreign key -> Share.id"
+        string sessionTokenHash UK "SHA-256 hash of session token"
+        datetime expiresAt "5-minute session lifetime"
+        datetime createdAt "Issuance timestamp"
+    }
+```
+
+---
+
+## ⏳ Two-Tier Expiration & Self-Destruction Lifecycle
+
+Shares self-destruct through an intentional two-tier process: instant synchronous blocking at request time, coupled with a scheduled background shredder for physical storage reclamation.
+
+```mermaid
+stateDiagram-v2
+    [*] --> Active: Files Staged & Share Created
+    
+    state Active {
+        [*] --> Accessible
+        Accessible --> Accessible: Valid Download (Quota Remaining)
+    }
+
+    Active --> ExpiredByTime: Clock passes expiresAt
+    Active --> ExhaustedByQuota: downloadsUsed reaches maxDownloads
+
+    state Tier1_InstantGate {
+        ExpiredByTime --> Blocked: Synchronous DB Check (expiresAt > NOW())
+        ExhaustedByQuota --> Blocked: Atomic Reservation Fails (Count = 0)
+        Blocked --> Generic404: Returns 404/410 Uniform Error
+    }
+
+    state Tier2_PhysicalCleanup {
+        Generic404 --> ScheduledWorker: cron fires (every 5 minutes)
+        ScheduledWorker --> DiskUnlink: fs.unlink(UUID files)
+        DiskUnlink --> HashWipe: Wipe passwordHash & session rows
+        HashWipe --> SoftDelete: Set deletedAt timestamp
+    }
+
+    SoftDelete --> [*]: Physical & Cryptographic Destruction Complete
+```
+
+---
+
+## 🏎️ Atomic Concurrency & Race Condition Defense
+
+When multiple concurrent requests attempt to download a share with only 1 download remaining, traditional "check-then-update" patterns suffer from **Time-of-Check to Time-of-Use (TOCTOU)** race conditions:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant Req1 as Request 1 (Client A)
+    participant Req2 as Request 2 (Client B)
+    participant PG as PostgreSQL Row Mutex
+    participant FS as File Stream
+
+    Note over Req1,Req2: Simultaneous Arrival at t = 0.000s
+    Req1->>PG: UPDATE "Share" SET "downloadsUsed" = "downloadsUsed" + 1 WHERE "downloadsUsed" < 1
+    Req2->>PG: UPDATE "Share" SET "downloadsUsed" = "downloadsUsed" + 1 WHERE "downloadsUsed" < 1
+    
+    Note over PG: PostgreSQL row-level lock evaluates queries sequentially
+    PG-->>Req1: 1 row affected (Success - Slot Reserved)
+    PG-->>Req2: 0 rows affected (Condition Failed: downloadsUsed is now 1)
+
+    Req1->>FS: Pipe file stream to Client A
+    FS-->>Req1: File Received (200 OK)
+
+    Req2-->>Req2: Rejected immediately with 404 / 410 Generic Not Found
+```
+
+---
+
+## 📁 Full-Stack Project Structure
 
 ```text
 FileNotFound/
-├── .git/                      # Git repository tracking
-├── LICENSE                    # MIT License
-├── README.md                  # Comprehensive project documentation & architecture guide
+├── LICENSE                        # MIT Open Source License
+├── README.md                      # Architecture documentation & visual guides
 │
-├── backend/                   # Zero-trust temporary file transfer backend service
+├── frontend/                      # Client Web Application (React 19 + Vite + Tailwind)
+│   ├── index.html                 # Single page application entry point
+│   ├── vite.config.ts             # Vite configuration with proxy & drive alignment
+│   ├── tailwind.config.js         # Editorial design tokens & font configuration
+│   ├── package.json               # Client dependencies
+│   ├── imgs/                      # Brand assets & logos
+│   │   ├── logo.png
+│   │   └── logo_no_bg.png
+│   └── src/
+│       ├── App.tsx                # App root, session provider & routes
+│       ├── main.tsx               # DOM bootstrap
+│       ├── index.css              # Custom equalizer keyframes, scrollbar & base styles
+│       ├── components/
+│       │   ├── layout/            # Navbar, Footer, RootLayout
+│       │   ├── receiver/          # PasswordChallenge, MetadataCard, DownloadList
+│       │   ├── share/             # ShareSuccessCard
+│       │   ├── ui/                # BarLoader (Equalizer), Button, Card, InitialLoadingScreen
+│       │   └── upload/            # Dropzone, FileStagingList, SecurityPolicyForm
+│       ├── context/
+│       │   └── SessionContext.tsx # In-memory session state & token management
+│       ├── pages/
+│       │   ├── UploadPage.tsx     # Drag-and-drop file upload & rule staging portal
+│       │   ├── ReceiverPage.tsx   # Recipient challenge, verification & download view
+│       │   ├── ShareCreatedPage.tsx # Share link generation view
+│       │   ├── PrivacyPage.tsx    # Zero-data retention privacy policy
+│       │   ├── TermsPage.tsx      # Terms of service
+│       │   └── NotFoundPage.tsx   # Custom 404 view
+│       ├── services/
+│       │   ├── api.ts             # Axios instance, interceptors & error handlers
+│       │   └── shareService.ts    # Live API service functions
+│       ├── types/                 # TypeScript interfaces for API contracts
+│       └── utils/                 # Formatting & class merging utilities
+│
+├── backend/                       # Core API Service (Node.js + Express + PostgreSQL)
 │   ├── prisma/
-│   │   ├── migrations/        # Declarative PostgreSQL schema migrations
-│   │   └── schema.prisma      # Prisma schema (Share, File, AccessSession models)
-│   ├── src/
-│   │   ├── config/
-│   │   │   ├── db.ts          # Singleton Prisma client instance
-│   │   │   └── env.ts         # Zod fail-fast environment validation
-│   │   ├── controllers/
-│   │   │   ├── downloadController.ts # Atomic single-file & streaming ZIP downloads
-│   │   │   ├── receiverController.ts # Share metadata lookup & password verification
-│   │   │   └── shareController.ts    # Multipart upload handler & share creation
-│   │   ├── jobs/
-│   │   │   └── cleanupJob.ts  # Non-overlapping scheduled cleanup worker (cron)
-│   │   ├── middleware/
-│   │   │   ├── errorHandler.ts       # Centralized error handler (no trace leakage)
-│   │   │   ├── rateLimiter.ts         # Tiered IP/token rate-limiters
-│   │   │   ├── requireSession.ts      # Session validation for protected shares
-│   │   │   ├── resolveShare.ts        # Share lookup & uniform 404 response
-│   │   │   ├── upload.ts              # Multer configuration (size/count enforcement)
-│   │   │   └── validation.ts          # Zod request body validation schemas
-│   │   ├── routes/
-│   │   │   ├── health.ts      # GET /api/health (DB and server status)
-│   │   │   └── share.ts       # Complete share creation, receiver, and download router
-│   │   ├── services/
-│   │   │   ├── cleanupService.ts      # Physical disk deletion, wipe & orphan sweep
-│   │   │   ├── metadataService.ts     # Metadata calculation & sanitization
-│   │   │   ├── reservationService.ts  # Atomic PostgreSQL row-level reservation
-│   │   │   └── shareService.ts        # Share creation & file hashing transactions
-│   │   ├── utils/
-│   │   │   ├── expiryParser.ts        # Expiration interval validator (10m, 1h, 24h)
-│   │   │   ├── fileCleanup.ts         # Async file removal helper
-│   │   │   ├── fileHash.ts            # Streaming SHA-256 file checksums
-│   │   │   ├── filenameSanitizer.ts   # RFC-compliant filename sanitization
-│   │   │   ├── logger.ts              # Structured JSON logger with auto-redaction
-│   │   │   ├── password.ts            # bcryptjs hash and compare (work factor 12)
-│   │   │   ├── safeCompare.ts         # crypto.timingSafeEqual wrapper
-│   │   │   ├── session.ts             # Session token generator & hash verifier
-│   │   │   ├── storedFilename.ts      # UUID stored filename generator
-│   │   │   ├── token.ts               # 32-byte URL-safe base64 token generator & hasher
-│   │   │   └── index.ts               # Barrel export for utility functions
-│   │   ├── app.ts             # Decoupled Express app (no port binding, test-ready)
-│   │   └── server.ts          # Server bootstrap & graceful shutdown handler
-│   ├── tests/
-│   │   ├── atomicDownload.test.ts     # Concurrency & download limit tests
-│   │   ├── cleanupService.test.ts     # Physical deletion & orphan sweep tests
-│   │   ├── hardening.test.ts          # Security headers, rate limiting & error handling
-│   │   ├── receiverEndpoints.test.ts  # Lookup & password verification tests
-│   │   ├── securityUtils.test.ts      # Unit tests for cryptographic helpers
-│   │   └── uploadShare.test.ts        # Integration tests for upload endpoints
-│   ├── uploads/               # Private local disk storage (git-ignored)
-│   ├── .env.example           # Template for environment variables
-│   ├── eslint.config.js       # ESLint configuration
-│   ├── package.json           # Backend scripts and dependencies
-│   ├── REQUIREMENTS.md        # Detailed backend dependency specification
-│   └── tsconfig.json          # Strict TypeScript configuration
+│   │   ├── schema.prisma          # Database schema (Share, File, AccessSession)
+│   │   └── migrations/            # Declarative SQL migrations
+│   ├── uploads/                   # Private disk storage for UUID files (git-ignored)
+│   ├── package.json               # Backend dependencies & scripts
+│   ├── tsconfig.json              # Strict TypeScript configuration
+│   ├── tests/                     # 39 Vitest & Supertest automated test suites
+│   │   ├── atomicDownload.test.ts # Concurrency & race condition validation
+│   │   ├── cleanupService.test.ts # Physical deletion & background cron tests
+│   │   ├── hardening.test.ts      # Helmet headers, rate limiting & error handling
+│   │   ├── receiverEndpoints.test.ts # Zero-knowledge metadata & session tests
+│   │   ├── securityUtils.test.ts  # Entropy, SHA-256, bcrypt & token unit tests
+│   │   └── uploadShare.test.ts    # Multipart upload integration tests
+│   └── src/
+│       ├── app.ts                 # Decoupled Express app (Helmet, CORS, rate limits)
+│       ├── server.ts              # HTTP bootstrap & graceful shutdown handler
+│       ├── config/
+│       │   ├── db.ts              # Prisma singleton client
+│       │   └── env.ts             # Zod environment variable validation
+│       ├── controllers/
+│       │   ├── downloadController.ts # Single-file & dynamic ZIP streaming
+│       │   ├── receiverController.ts # Zero-knowledge lookup & password verification
+│       │   └── shareController.ts    # Multipart upload & share creation handler
+│       ├── jobs/
+│       │   └── cleanupJob.ts      # Scheduled non-overlapping cleanup worker
+│       ├── middleware/
+│       │   ├── errorHandler.ts    # Centralized error handler (no stack leakage)
+│       │   ├── rateLimiter.ts     # IP-based sliding-window rate limiters
+│       │   ├── requireSession.ts  # Session token & cookie verification
+│       │   ├── resolveShare.ts    # Share lookup with uniform 404 masking
+│       │   ├── upload.ts          # Multer disk storage & size restrictions
+│       │   └── validation.ts      # Zod request validation schemas
+│       ├── services/
+│       │   ├── cleanupService.ts  # Disk file unlinking & database sweeping
+│       │   ├── metadataService.ts # Server-side metadata sanitizer
+│       │   ├── reservationService.ts # Atomic conditional PostgreSQL update
+│       │   └── shareService.ts    # Transactional share & file creation
+│       └── utils/                 # Token generation, hashing, and sanitization
 │
-├── frontend/                  # Web application client portal
-│   └── imgs/                  # Brand and visual UI assets
-│       ├── logo.png           # FileNotFound brand logo
-│       └── logo_no_bg.png     # Transparent brand logo asset
-│
-└── mds/                       # Architectural specifications & system workflows
-    ├── BACKENDWORKFLOW.md     # Phase-by-phase backend implementation guide
-    ├── INITIAL.md             # Initial project goals, requirements & specifications
-    ├── SCHEMA_CONVENTIONS.md  # Database models, field naming & SQL conventions
-    ├── TECHSTACK.md           # Full-stack architectural tech stack guide
-    └── design.md              # Frontend UI/UX design system specification
+└── mds/                           # Architecture guides and specifications
+    ├── BACKENDWORKFLOW.md         # Step-by-step backend build workflow
+    ├── INITIAL.md                 # Original system requirements
+    ├── SCHEMA_CONVENTIONS.md      # Database modeling standards
+    ├── TECHSTACK.md               # Technology selection rationale
+    ├── THEORY.md                  # Comprehensive theory guide for beginners
+    └── design.md                  # Editorial frontend UI/UX design specification
 ```
 
 ---
 
-## Getting Started
+## 🚀 Quick Start & Local Setup
 
 ### 1. Prerequisites
 - **Node.js**: v20.x or v24.x LTS installed
-- **PostgreSQL**: Running locally or via Docker
+- **PostgreSQL 16**: Running locally (e.g. port 5432) or via Docker
 
-### 2. Installation
+---
+
+### 2. Backend Setup
+1. Open a terminal and navigate to the backend directory:
+   ```bash
+   cd backend
+   npm install
+   ```
+
+2. Create your `.env` configuration file:
+   ```env
+   PORT=4000
+   DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/filetransfer?schema=public"
+   CLIENT_ORIGIN=http://localhost:5180
+   UPLOAD_DIR=./uploads
+   MAX_FILE_SIZE_MB=100
+   ```
+   *(Note: If your database password contains characters like `#` or `@`, URL-encode them: `#` $\rightarrow$ `%23`)*
+
+3. Run the database migrations:
+   ```bash
+   npx prisma migrate dev
+   ```
+
+4. Start the backend development server:
+   ```bash
+   npm run dev
+   ```
+   The backend will be live at `http://localhost:4000`.
+
+---
+
+### 3. Frontend Setup
+1. Open a second terminal and navigate to the frontend directory:
+   ```bash
+   cd frontend
+   npm install
+   ```
+
+2. Verify or create your `frontend/.env` file:
+   ```env
+   # Leave empty to utilize local Vite dev server proxy (/api -> http://localhost:4000)
+   VITE_API_BASE_URL=
+
+   # Set to false to communicate directly with the live backend
+   VITE_USE_MOCK=false
+   ```
+
+3. Start the frontend development server:
+   ```bash
+   npm run dev
+   ```
+   Open your browser at **[http://localhost:5180](http://localhost:5180)**.
+
+---
+
+## 🔌 API Specification & Endpoints
+
+| Method | Endpoint | Description | Rate Limit |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/api/health` | Service & PostgreSQL connectivity check (`SELECT 1`) | 100 req / 15m |
+| `POST` | `/api/shares` | Multi-file upload and rule configuration | 10 req / 15m |
+| `GET` | `/api/shares/:token` | Share resolution (returns `{ passwordRequired: true }` if locked) | 100 req / 15m |
+| `POST` | `/api/shares/:token/verify` | Password verification & 5-minute session issuance | 5 attempts / 15m |
+| `GET` | `/api/shares/:token/metadata` | Protected file metadata (requires session header/cookie) | 100 req / 15m |
+| `GET` | `/api/shares/:token/files/:fileId/download` | Atomic single-file download stream | 100 req / 15m |
+| `GET` | `/api/shares/:token/download-all` | Atomic dynamic ZIP streaming for all files | 100 req / 15m |
+
+---
+
+## 🧪 Automated Testing & Verification
+
+FileNotFound maintains an automated test suite across all security layers:
+
 ```bash
 cd backend
-npm install
-```
-
-### 3. Environment Configuration
-Create a `.env` file in `backend/` by copying `.env.example`:
-
-```bash
-cp .env.example .env
-```
-
-Edit `.env` with your PostgreSQL credentials:
-```env
-PORT=4000
-DATABASE_URL="postgresql://postgres:YOUR_PASSWORD@localhost:5432/filetransfer?schema=public"
-CLIENT_ORIGIN=http://localhost:5173
-UPLOAD_DIR=./uploads
-MAX_FILE_SIZE_MB=100
-```
-*(Note: If your password contains special characters like `#` or `@`, ensure they are URL-encoded, e.g. `#` → `%23`)*
-
-### 4. Database Setup & Migrations
-Create the database and apply the Prisma migrations:
-```bash
-npx prisma migrate dev
-```
-
-### 5. Running the Application
-
-- **Development Mode** (auto-restart with `tsx watch`):
-  ```bash
-  npm run dev
-  ```
-- **Build Production Bundle**:
-  ```bash
-  npm run build
-  ```
-- **Start Production Server**:
-  ```bash
-  npm run start
-  ```
-
----
-
-## API Endpoints Reference
-
-### 1. Health Check
-- `GET /api/health`
-  - Validates server state and active database connectivity (`SELECT 1`).
-  - Response: `{ "status": "ok", "services": { "database": "connected", "server": "running" } }`
-
-### 2. Upload & Share Creation
-- `POST /api/shares`
-  - Multipart form data:
-    - `files`: 1 to 10 files (max 100 MB per file, combined cap 200 MB).
-    - `expiresIn`: `'10m'` | `'1h'` | `'24h'`.
-    - `maxDownloads`: `1` | `3` | `10`.
-    - `password`: *(Optional)* Minimum 8 characters.
-  - Rate limit: 10 uploads per 15 minutes per IP.
-  - Response (201 Created):
-    ```json
-    {
-      "shareLink": "http://localhost:5173/s/17_token_xyz...",
-      "expiresAt": "2026-10-28T01:05:00.000Z",
-      "maxDownloads": 3,
-      "fileCount": 2
-    }
-    ```
-
-### 3. Receiver Endpoints
-- `GET /api/shares/:token`
-  - **Password Protected Share**: Returns `{ "passwordRequired": true }` (no files or counts revealed).
-  - **Public Share**: Returns full metadata (`files`, `timeRemainingSeconds`, `downloadsRemaining`).
-- `POST /api/shares/:token/verify`
-  - Body: `{ "password": "userPassword" }`.
-  - Rate limit: Strict 5 attempts per 15 minutes per `IP:token`.
-  - Response: Unlocks metadata and issues an `access_session_token` cookie and JSON `sessionToken` valid for 5 minutes.
-- `GET /api/shares/:token/metadata`
-  - Requires `x-session-token` header or session cookie for password-protected shares.
-
-### 4. Atomic Download Endpoints
-- `GET /api/shares/:token/files/:fileId/download`
-  - Reserves download slot atomically via PostgreSQL.
-  - Streams single file with `Content-Disposition: attachment`, sanitized name, and `X-Content-Type-Options: nosniff`.
-- `GET /api/shares/:token/download-all`
-  - Reserves single download slot for entire archive.
-  - Dynamically streams multi-file compressed ZIP without buffering in server memory.
-
----
-
-## Testing & Quality Assurance
-
-The codebase includes an automated test suite implemented in **Vitest** and **Supertest** covering all phases:
-
-| Test Suite | File | Coverage |
-|---|---|---|
-| **Unit Tests** | `tests/securityUtils.test.ts` | Token entropy, SHA-256 hashes, bcrypt, UUID filenames, stream hashes, filename sanitizer, expiry parser. |
-| **Upload API** | `tests/uploadShare.test.ts` | Multi-file upload, zero-byte rejection, 100MB limit, option validation, rollback on error. |
-| **Receiver API** | `tests/receiverEndpoints.test.ts` | Zero information leakage before password, uniform 404s, session generation, metadata access. |
-| **Concurrency** | `tests/atomicDownload.test.ts` | 10 parallel download requests competing for 1 download slot, ZIP streaming, foreign file rejection. |
-| **Hardening** | `tests/hardening.test.ts` | Helmet headers, rate limiting (429 on brute force), body limits, error sanitizer. |
-| **Cleanup** | `tests/cleanupService.test.ts` | Physical disk deletion, audit soft-delete, password wiping, session purging, disk orphan sweep. |
-
-### Run the Test Suite:
-```bash
 npm test
 ```
-*(All 39 tests pass cleanly against the local PostgreSQL test instance)*
+
+```text
+ ✓ tests/cleanupService.test.ts (2 tests)
+ ✓ tests/securityUtils.test.ts (10 tests)
+ ✓ tests/uploadShare.test.ts (8 tests)
+ ✓ tests/atomicDownload.test.ts (5 tests)
+ ✓ tests/receiverEndpoints.test.ts (10 tests)
+ ✓ tests/hardening.test.ts (4 tests)
+
+ Test Files  6 passed (6)
+      Tests  39 passed (39)
+   Duration  7.33s
+```
+
+### Coverage Highlights:
+- **Entropy & Tokens**: Validates 256 bits of CSPRNG entropy from `crypto.randomBytes(32)` in base64url format.
+- **Race Condition Resistance**: Fires 10 concurrent requests simultaneously against a 1-download limit; exactly 1 succeeds and 9 receive 404/410.
+- **Zero Information Disclosure**: Ensures unauthenticated responses for protected shares never contain file counts, file names, sizes, or expiration timestamps.
+- **Stream Integrity**: Verifies SHA-256 file checksums match on disk and during download.
+- **Physical Cleanup**: Confirms `node-cron` physically deletes files from disk and wipes hashes upon expiration.
 
 ---
 
-## License
-MIT License.
+## 📄 License
+This project is licensed under the [MIT License](LICENSE).

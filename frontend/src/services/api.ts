@@ -41,7 +41,7 @@ export function parseApiError(error: unknown): {
     const status = axiosErr.response?.status;
     const data = axiosErr.response?.data;
 
-    if (data?.error) {
+    if (data && typeof data === 'object' && 'error' in data && data.error) {
       return {
         message: data.error,
         status,
@@ -100,3 +100,28 @@ export function parseApiError(error: unknown): {
   return { message: 'An unexpected error occurred. Please try again.' };
 }
 
+/**
+ * Parses errors where the responseType was 'blob', reading the underlying JSON error if available.
+ */
+export async function parseBlobError(error: unknown): Promise<{
+  message: string;
+  status?: number;
+  passwordRequired?: boolean;
+}> {
+  if (axios.isAxiosError(error) && error.response?.data instanceof Blob) {
+    try {
+      const text = await error.response.data.text();
+      const json = JSON.parse(text);
+      if (json && json.error) {
+        return {
+          message: json.error,
+          status: error.response.status,
+          passwordRequired: json.passwordRequired,
+        };
+      }
+    } catch {
+      // Fall through to standard parseApiError
+    }
+  }
+  return parseApiError(error);
+}
