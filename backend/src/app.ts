@@ -53,6 +53,20 @@ export function createApp(): Express {
   app.use(express.json({ limit: '1mb' }));
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
+  // Root diagnostic status endpoint
+  app.get('/', (_req, res) => {
+    res.status(200).json({
+      name: 'FileNotFound API Gateway',
+      status: 'online',
+      version: '1.0.0',
+      clientOrigin: config.CLIENT_ORIGIN,
+      endpoints: {
+        health: '/api/health',
+        shares: '/api/shares',
+      },
+    });
+  });
+
   // API Routes
   app.use('/api', healthRouter);
   app.use('/api', shareRouter);

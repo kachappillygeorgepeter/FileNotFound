@@ -9,16 +9,33 @@ export const MAX_FILES_PER_SHARE = 10;
 export const MAX_FILE_SIZE_BYTES = config.MAX_FILE_SIZE_MB * 1024 * 1024; // 100 MB per file
 export const MAX_TOTAL_SIZE_BYTES = 200 * 1024 * 1024; // 200 MB combined limit per share
 
-// Ensure the private uploads directory exists
-const uploadDir = path.resolve(config.UPLOAD_DIR);
-if (!fs.existsSync(uploadDir)) {
-  fs.mkdirSync(uploadDir, { recursive: true });
+function resolveUploadDir(): string {
+  if (process.env.VERCEL || process.env.AWS_LAMBDA_FUNCTION_NAME) {
+    return '/tmp/uploads';
+  }
+  return path.resolve(config.UPLOAD_DIR);
+}
+
+export const uploadDir = resolveUploadDir();
+try {
+  if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn('Notice: uploads directory setup deferred or read-only:', err);
 }
 
 // Multer disk storage using random UUID names
 const storage = multer.diskStorage({
   destination: (_req, _file, cb) => {
-    cb(null, uploadDir);
+    try {
+      if (!fs.existsSync(uploadDir)) {
+        fs.mkdirSync(uploadDir, { recursive: true });
+      }
+      cb(null, uploadDir);
+    } catch (err) {
+      cb(err as Error, uploadDir);
+    }
   },
   filename: (_req, _file, cb) => {
     // Generate UUID filename with no relation to original name
