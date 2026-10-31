@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ExpiryOption, MaxDownloadsOption, UploadProgress } from '../types/share';
 import { Dropzone } from '../components/upload/Dropzone';
 import { FileStagingList } from '../components/upload/FileStagingList';
@@ -335,39 +335,20 @@ export const UploadPage: React.FC = () => {
 
       {/* 5. CALL TO ACTION SECTION (whereInVIT Night Black #0D0D0D CTA) */}
       <section className="py-32 md:py-48 bg-[#0D0D0D] text-white text-center px-6 border-t border-[#111111]">
-        <div className="max-w-5xl mx-auto flex flex-col md:flex-row items-center justify-between gap-24 md:gap-12">
-          <div className="flex-1 text-left">
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 uppercase">
-              SENDING FILES?
-            </h2>
-            <p className="text-white/60 mb-12 text-lg md:text-xl font-light">
-              Stage and share sensitive payloads with automated destruction upon access.
-            </p>
-            <button
-              type="button"
-              onClick={scrollToUpload}
-              className="inline-block bg-white text-[#111111] px-10 py-5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] hover:scale-105 transition-all rounded-none shadow-[0_0_40px_rgba(255,255,255,0.1)]"
-            >
-              SHARE A FILE NOW
-            </button>
-          </div>
-
-          <div className="w-full md:w-px h-px md:h-64 bg-white/20" />
-
-          <div className="flex-1 text-left md:pl-12">
-            <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 uppercase">
-              RECEIVED A LINK?
-            </h2>
-            <p className="text-white/60 mb-12 text-lg md:text-xl font-light">
-              Enter your authorized link and passkey to initiate atomic file retrieval.
-            </p>
-            <Link
-              to="/security"
-              className="inline-block bg-white text-[#111111] px-10 py-5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] hover:scale-105 transition-all rounded-none shadow-[0_0_40px_rgba(255,255,255,0.1)]"
-            >
-              SECURITY DETAILS
-            </Link>
-          </div>
+        <div className="max-w-3xl mx-auto flex flex-col items-center text-center">
+          <h2 className="text-3xl md:text-5xl font-extrabold tracking-tight mb-6 uppercase">
+            SENDING FILES?
+          </h2>
+          <p className="text-white/60 mb-12 text-lg md:text-xl font-light max-w-xl">
+            Stage and share sensitive payloads with automated destruction upon access.
+          </p>
+          <button
+            type="button"
+            onClick={scrollToUpload}
+            className="inline-block bg-white text-[#111111] px-10 py-5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] hover:scale-105 transition-all rounded-none shadow-[0_0_40px_rgba(255,255,255,0.1)]"
+          >
+            SHARE A FILE NOW
+          </button>
         </div>
       </section>
     </div>
