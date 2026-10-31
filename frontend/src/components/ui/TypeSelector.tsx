@@ -26,16 +26,16 @@ export function TypeSelector<T extends string | number>({
   const widthPercent = 100 / options.length;
 
   return (
-    <div className={cn('w-full text-left', className)}>
+    <div className={cn('type-selector-wrapper w-full text-left', className)}>
       {label && (
         <label className="block text-[10px] font-bold tracking-[0.2em] text-[#555555] uppercase mb-2 select-none">
           {label}
         </label>
       )}
-      <div className="relative flex w-full border border-[#E5E5E5] bg-[#F7F7F5] p-1">
+      <div className="type-selector-track relative flex w-full border border-[#E5E5E5] bg-[#F7F7F5] p-1">
         {/* Sliding active indicator */}
         <div
-          className="absolute top-1 bottom-1 bg-[#111111] transition-transform duration-500 ease-in-out"
+          className="type-selector-indicator absolute top-1 bottom-1 bg-[#111111] transition-transform duration-500 ease-in-out"
           style={{
             width: `calc(${widthPercent}% - 0.25rem)`,
             transform: `translateX(calc(${activeIndex * 100}% + ${activeIndex * 0.25}rem))`,
@@ -49,15 +49,15 @@ export function TypeSelector<T extends string | number>({
               type="button"
               onClick={() => onChange(opt.value)}
               className={cn(
-                'relative flex-1 py-4 text-xs font-bold tracking-[0.2em] uppercase transition-colors duration-500 ease-in-out z-10 text-center select-none',
+                'type-selector-btn relative flex-1 py-4 text-xs font-bold tracking-[0.2em] uppercase transition-colors duration-500 ease-in-out z-10 text-center select-none',
                 isSelected ? 'text-white' : 'text-[#555555] hover:text-[#111111]'
               )}
             >
-              <span>{opt.label}</span>
+              <span className="type-selector-label">{opt.label}</span>
               {opt.badge && (
                 <span
                   className={cn(
-                    'ml-2 text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded-none uppercase',
+                    'type-selector-badge ml-2 text-[9px] font-bold tracking-widest px-1.5 py-0.5 rounded-none uppercase',
                     isSelected ? 'bg-white text-[#111111]' : 'bg-[#E5E5E5] text-[#555555]'
                   )}
                 >
@@ -71,4 +71,3 @@ export function TypeSelector<T extends string | number>({
     </div>
   );
 }
-

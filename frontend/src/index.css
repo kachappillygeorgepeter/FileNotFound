@@ -100,3 +100,459 @@
     transform: scaleY(0.5) !important;
   }
 }
+
+/* ==========================================================================
+   NAVIGATION RESPONSIVE DEFAULTS (Desktop: > 775px)
+   ========================================================================== */
+.navbar-desktop-nav {
+  display: flex;
+}
+.navbar-desktop-cta {
+  display: flex;
+}
+.navbar-mobile-toggle {
+  display: none;
+}
+.navbar-mobile-drawer {
+  display: none;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN SYSTEM (DESKTOP-FIRST MAX-WIDTH BREAKPOINTS)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. Breakpoint: @media (max-width: 1536px) — Large Desktops / Wide Laptops
+   -------------------------------------------------------------------------- */
+@media (max-width: 1536px) {
+  .hero-container,
+  .upload-portal-section,
+  #how-it-works .max-w-\[1600px\],
+  section.max-w-\[1600px\] {
+    max-width: 1360px;
+  }
+
+  .hero-title {
+    font-size: clamp(4.5rem, 7vw, 6.75rem);
+    line-height: 0.88;
+  }
+
+  .process-matrix-grid > div {
+    padding: 2.25rem 2rem;
+  }
+
+  .security-guarantees-grid {
+    gap: 3rem 2.5rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. Breakpoint: @media (max-width: 1280px) — Standard Laptops
+   -------------------------------------------------------------------------- */
+@media (max-width: 1280px) {
+  .hero-section {
+    min-height: 75vh;
+    padding-top: 7rem;
+    padding-bottom: 5rem;
+  }
+
+  .hero-container,
+  .upload-portal-section,
+  #how-it-works .max-w-\[1600px\],
+  section.max-w-\[1600px\] {
+    max-width: 1120px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .hero-title {
+    font-size: clamp(3.75rem, 6.25vw, 5.25rem);
+    margin-bottom: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1.125rem;
+    max-width: 32rem;
+    margin-bottom: 3rem;
+  }
+
+  .upload-form-card {
+    padding: 2.5rem;
+  }
+
+  .process-matrix-grid > div {
+    padding: 2rem 1.5rem;
+  }
+
+  .process-matrix-grid span {
+    font-size: 2.5rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .security-guarantees-grid {
+    gap: 2.5rem 2rem;
+  }
+
+  .cta-section {
+    padding-top: 7rem;
+    padding-bottom: 7rem;
+  }
+
+  .cta-container {
+    gap: 2rem;
+  }
+
+  .cta-divider {
+    height: 12rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. Breakpoint: @media (max-width: 1024px) — Small Laptops / Landscape Tablets
+   -------------------------------------------------------------------------- */
+@media (max-width: 1024px) {
+  .hero-section {
+    min-height: auto;
+    padding-top: 6rem;
+    padding-bottom: 4.5rem;
+  }
+
+  .hero-container,
+  .upload-portal-section,
+  #how-it-works .max-w-\[1600px\],
+  section.max-w-\[1600px\] {
+    max-width: 100%;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .hero-title {
+    font-size: clamp(3rem, 5.5vw, 4.25rem);
+    letter-spacing: -0.04em;
+  }
+
+  .hero-subtitle {
+    font-size: 1.0625rem;
+    margin-bottom: 2.5rem;
+  }
+
+  /* Transition Process Matrix: 4 columns -> 2 columns */
+  .process-matrix-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  /* Transition Security Guarantees: 3 columns -> 2 columns */
+  .security-guarantees-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 2.5rem 1.75rem;
+  }
+
+  .upload-form-card {
+    padding: 2rem;
+  }
+
+  .navbar-desktop-nav {
+    margin-left: 2rem;
+    gap: 1.5rem;
+  }
+
+  .cta-section {
+    padding-top: 5rem;
+    padding-bottom: 5rem;
+  }
+
+  .cta-container {
+    flex-direction: column;
+    text-align: center;
+    gap: 3.5rem;
+  }
+
+  .cta-container > div {
+    text-align: center;
+    padding-left: 0;
+  }
+
+  .cta-divider {
+    width: 100%;
+    height: 1px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. Breakpoint: @media (max-width: 775px) — Portrait Tablets / Large Phones
+   -------------------------------------------------------------------------- */
+@media (max-width: 775px) {
+  /* Navigation: Collapse horizontal bar into mobile hamburger toggle */
+  .navbar-desktop-nav {
+    display: none;
+  }
+
+  .navbar-desktop-cta {
+    display: none;
+  }
+
+  .navbar-mobile-toggle {
+    display: flex;
+    min-width: 44px;
+    min-height: 44px;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .navbar-mobile-drawer {
+    display: block;
+  }
+
+  .hero-section {
+    padding-top: 4.5rem;
+    padding-bottom: 3.5rem;
+  }
+
+  .hero-tagline {
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2.35rem, 7.5vw, 3.25rem);
+    line-height: 0.95;
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 2rem;
+  }
+
+  /* Stack Hero action buttons */
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  .hero-actions button,
+  .hero-actions a {
+    width: 100%;
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Transition Process Matrix: 2 columns -> 1 single column */
+  .process-matrix-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .process-matrix-grid > div {
+    padding: 1.75rem 1.25rem;
+  }
+
+  /* Transition Security Guarantees: 2 columns -> 1 single column */
+  .security-guarantees-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .upload-form-card {
+    padding: 1.75rem 1.25rem;
+    box-shadow: none;
+  }
+
+  .upload-form-actions {
+    flex-direction: column-reverse;
+    width: 100%;
+    gap: 0.75rem;
+  }
+
+  .upload-form-actions button {
+    width: 100%;
+    min-height: 48px;
+  }
+
+  /* Interactive touch target baseline */
+  input,
+  button,
+  select,
+  textarea {
+    min-height: 44px;
+  }
+
+  .footer-links {
+    gap: 1rem;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   5. Breakpoint: @media (max-width: 575px) — Phones
+   -------------------------------------------------------------------------- */
+@media (max-width: 575px) {
+  body {
+    font-size: 0.875rem; /* Enforce 14px minimum body text */
+  }
+
+  .hero-section {
+    padding-top: 3.5rem;
+    padding-bottom: 2.5rem;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .hero-container,
+  .upload-portal-section,
+  #how-it-works .max-w-\[1600px\],
+  section.max-w-\[1600px\] {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .hero-title {
+    font-size: clamp(2rem, 9.5vw, 2.5rem);
+    letter-spacing: -0.03em;
+  }
+
+  .hero-subtitle {
+    font-size: 0.9375rem;
+    line-height: 1.5;
+  }
+
+  .upload-form-card {
+    padding: 1.25rem 1rem;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  .upload-form-card h2 {
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Dropzone responsive adjustment */
+  .dropzone-card {
+    padding: 2rem 1rem !important;
+  }
+
+  /* Type selector badges and labels on phone screens */
+  .type-selector-btn {
+    padding: 0.75rem 0.35rem;
+    font-size: 10px;
+    letter-spacing: 0.1em;
+  }
+
+  .type-selector-badge {
+    display: none; /* Hide non-critical badges to avoid awkward line wrapping */
+  }
+
+  /* Footer layout */
+  .site-footer {
+    flex-direction: column;
+    text-align: center;
+    padding: 2.5rem 1rem;
+    gap: 1.5rem;
+  }
+
+  .footer-brand {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .footer-separator {
+    display: none;
+  }
+
+  .footer-links {
+    justify-content: center;
+    gap: 1.25rem;
+  }
+
+  .footer-tagline {
+    font-size: 9px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   6. Breakpoint: @media (max-width: 320px) — Small Phones
+   -------------------------------------------------------------------------- */
+@media (max-width: 320px) {
+  html,
+  body {
+    overflow-x: hidden;
+  }
+
+  .hero-section,
+  .hero-container,
+  .upload-portal-section,
+  #how-it-works .max-w-\[1600px\],
+  section.max-w-\[1600px\],
+  .site-footer {
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+  }
+
+  .navbar-brand {
+    gap: 0.5rem;
+  }
+
+  .navbar-logo {
+    height: 1.75rem;
+    width: 1.75rem;
+  }
+
+  .navbar-brand-name {
+    font-size: 1.125rem;
+  }
+
+  .hero-title {
+    font-size: 1.75rem;
+    letter-spacing: -0.02em;
+    line-height: 1;
+    margin-bottom: 1rem;
+  }
+
+  .hero-subtitle {
+    font-size: 0.875rem; /* Exactly 14px minimum */
+    margin-bottom: 1.5rem;
+  }
+
+  .hero-actions button,
+  .hero-actions a {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    padding-left: 1rem;
+    padding-right: 1rem;
+    min-height: 44px;
+  }
+
+  /* Type selector stacked vertically on extreme small screen */
+  .type-selector-track {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  .type-selector-indicator {
+    display: none; /* Hide sliding indicator on vertical stack, rely on selected background */
+  }
+
+  .type-selector-btn {
+    width: 100%;
+    min-height: 44px;
+    padding: 0.5rem;
+  }
+
+  .type-selector-btn.text-white {
+    background-color: #111111;
+  }
+
+  .upload-form-card {
+    padding: 1rem 0.5rem;
+  }
+
+  .upload-form-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .cta-section h2 {
+    font-size: 1.5rem;
+  }
+}

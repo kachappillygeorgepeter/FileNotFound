@@ -35,18 +35,18 @@ export const Navbar: React.FC = () => {
           <div className="flex items-center">
             <Link
               to="/"
-              className="flex-shrink-0 flex items-center gap-3.5 text-xl md:text-2xl font-bold tracking-tight text-[#111111] group"
+              className="navbar-brand flex-shrink-0 flex items-center gap-3.5 text-xl md:text-2xl font-bold tracking-tight text-[#111111] group"
             >
               <img
                 src={logoImg}
                 alt="FileNotFound Logo"
-                className="h-10 w-10 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105"
+                className="navbar-logo h-10 w-10 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105"
               />
-              <span className="normal-case">FileNotFound</span>
+              <span className="navbar-brand-name normal-case">FileNotFound</span>
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <div className="hidden md:ml-16 md:flex md:space-x-12">
+            {/* Desktop Navigation Links (Switches at 775px) */}
+            <div className="navbar-desktop-nav ml-16 space-x-12">
               {navLinks.map((link) => {
                 const isAnchor = link.href.startsWith('/#');
                 const isActive =
@@ -81,8 +81,8 @@ export const Navbar: React.FC = () => {
             </div>
           </div>
 
-          {/* Right Action */}
-          <div className="hidden md:flex md:items-center">
+          {/* Right Action (Switches at 775px) */}
+          <div className="navbar-desktop-cta items-center">
             {location.pathname === '/' ? (
               <button
                 type="button"
@@ -101,13 +101,14 @@ export const Navbar: React.FC = () => {
             )}
           </div>
 
-          {/* Mobile menu toggle */}
-          <div className="flex items-center md:hidden">
+          {/* Mobile menu toggle (Switches at 775px) */}
+          <div className="navbar-mobile-toggle items-center">
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               type="button"
-              className="inline-flex items-center justify-center p-2 text-[#111111] hover:bg-[#F7F7F5] rounded-none focus:outline-none transition-colors"
-              aria-label="Open main menu"
+              className="navbar-hamburger-btn inline-flex items-center justify-center p-2 text-[#111111] hover:bg-[#F7F7F5] rounded-none focus:outline-none transition-colors"
+              aria-label="Toggle navigation menu"
+              aria-expanded={mobileMenuOpen}
             >
               <svg className="block h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path
@@ -122,9 +123,9 @@ export const Navbar: React.FC = () => {
         </div>
       </div>
 
-      {/* Mobile Drawer */}
+      {/* Mobile Drawer (Switches at 775px) */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-[#E5E5E5] bg-white absolute w-full shadow-2xl z-50">
+        <div className="navbar-mobile-drawer border-t border-[#E5E5E5] bg-white absolute w-full shadow-2xl z-50">
           <div className="pt-4 pb-6 space-y-4 px-6">
             {navLinks.map((link) => (
               <Link
