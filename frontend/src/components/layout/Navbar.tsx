@@ -12,6 +12,7 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Home', href: '/' },
+    { name: 'Receive File', href: '/receive' },
     { name: 'How It Works', href: '/#how-it-works' },
     { name: 'Privacy', href: '/privacy' },
     { name: 'Terms', href: '/terms' },
@@ -82,7 +83,13 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right Action (Switches at 775px) */}
-          <div className="navbar-desktop-cta items-center">
+          <div className="navbar-desktop-cta items-center gap-3">
+            <Link
+              to="/receive"
+              className="bg-white text-[#111111] px-6 py-3.5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] transition-colors border border-[#E5E5E5] hover:border-[#111111] rounded-none"
+            >
+              RECEIVE A LINK
+            </Link>
             {location.pathname === '/' ? (
               <button
                 type="button"
@@ -138,6 +145,12 @@ export const Navbar: React.FC = () => {
             ))}
 
             <div className="pt-2 flex flex-col gap-3">
+              <Link
+                to="/receive"
+                className="w-full text-center bg-white text-[#111111] py-4 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] transition-colors border border-[#E5E5E5] rounded-none"
+              >
+                RECEIVE A LINK
+              </Link>
               <Link
                 to="/"
                 className="w-full text-center bg-[#111111] text-white py-4 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#333333] transition-colors border border-[#111111] rounded-none"

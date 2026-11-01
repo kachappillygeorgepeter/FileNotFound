@@ -109,7 +109,7 @@ export const UploadPage: React.FC = () => {
   return (
     <div className="w-full min-h-screen bg-white select-none">
       {/* 1. MAIN HERO */}
-      <section className="hero-section w-full min-h-[85vh] flex flex-col items-center justify-center pt-32 pb-20 px-6 relative bg-white border-b border-[#E5E5E5]">
+      <section className="hero-section w-full min-h-[60vh] flex flex-col items-center justify-center pt-16 pb-20 px-6 relative bg-white border-b border-[#E5E5E5]">
         <div className="hero-container max-w-[1600px] w-full mx-auto flex flex-col items-center text-center">
           <p className="text-[#111111] text-xs font-bold tracking-[0.4em] mb-12 normal-case">
             FileNotFound
@@ -362,10 +362,10 @@ export const UploadPage: React.FC = () => {
               Enter your authorized link and passkey to initiate atomic file retrieval.
             </p>
             <Link
-              to="/privacy"
+              to="/receive"
               className="inline-block bg-white text-[#111111] px-10 py-5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] hover:scale-105 transition-all rounded-none shadow-[0_0_40px_rgba(255,255,255,0.1)]"
             >
-              PRIVACY & POLICY
+              RECEIVE A LINK
             </Link>
           </div>
         </div>

@@ -6,6 +6,7 @@ import { RootLayout } from './components/layout/RootLayout';
 import { UploadPage } from './pages/UploadPage';
 import { ShareCreatedPage } from './pages/ShareCreatedPage';
 import { ReceiverPage } from './pages/ReceiverPage';
+import { ReceiveLinkPage } from './pages/ReceiveLinkPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -52,6 +53,7 @@ export const App: React.FC = () => {
           <Routes>
             <Route element={<RootLayout />}>
               <Route path="/" element={<UploadPage />} />
+              <Route path="/receive" element={<ReceiveLinkPage />} />
               <Route path="/share-created" element={<ShareCreatedPage />} />
               <Route path="/s/:token" element={<ReceiverPage />} />
               <Route path="/share/:token" element={<ReceiverPage />} />
