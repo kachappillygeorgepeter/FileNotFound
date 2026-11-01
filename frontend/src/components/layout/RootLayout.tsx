@@ -2,7 +2,6 @@ import React from 'react';
 import { Outlet } from 'react-router-dom';
 import { Navbar } from './Navbar';
 import { Footer } from './Footer';
-import { GhostMascot } from '../ui/GhostMascot';
 
 export const RootLayout: React.FC = () => {
   return (
@@ -12,8 +11,7 @@ export const RootLayout: React.FC = () => {
         <Outlet />
       </main>
       <Footer />
-      {/* Floating Ghost Mascot */}
-      <GhostMascot />
     </div>
   );
 };
+

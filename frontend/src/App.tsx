@@ -11,6 +11,7 @@ import { PrivacyPage } from './pages/PrivacyPage';
 import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { InitialLoadingScreen } from './components/ui/InitialLoadingScreen';
+import { GhostMascot } from './components/ui/GhostMascot';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -63,6 +64,8 @@ export const App: React.FC = () => {
               <Route path="*" element={<NotFoundPage />} />
             </Route>
           </Routes>
+          {/* Mascot only renders after initial loading completes and user reaches the landing */}
+          {!initialLoading && <GhostMascot />}
         </BrowserRouter>
       </SessionProvider>
     </QueryClientProvider>
