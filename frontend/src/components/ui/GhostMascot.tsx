@@ -25,6 +25,7 @@ export const MAX_TILT_DEG = 2.5; // slight tilt in direction of travel: 1 to 3 d
 export const FACES_RIGHT_BY_DEFAULT = true;
 
 // Vanish & Respawn timings
+export const INITIAL_SPAWN_DELAY_MS = 2000; // 2 seconds initial delay before ghost appears on website launch
 export const VANISH_DURATION_MS = 600; // 500 to 700ms
 export const RESPAWN_DELAY_MS = 10000; // exactly 10 seconds
 export const APPEAR_DURATION_MS = 1000; // ~1 second gradual fade-in
@@ -104,7 +105,7 @@ export const GhostMascot: React.FC = () => {
   const [bobOffset, setBobOffset] = useState<number>(0);
 
   // Lifecycle states: 'roaming' | 'vanishing' | 'hidden' | 'appearing'
-  const [mascotState, setMascotState] = useState<'roaming' | 'vanishing' | 'hidden' | 'appearing'>('roaming');
+  const [mascotState, setMascotState] = useState<'roaming' | 'vanishing' | 'hidden' | 'appearing'>('hidden');
 
   // Animation and physics refs
   const posRef = useRef({ x: 100, y: 180 });
@@ -172,6 +173,26 @@ export const GhostMascot: React.FC = () => {
     isMovingRef.current = true;
   }, [mascotSize, getSafeRandomPoint]);
 
+  // Initial delay timer to wait 3 seconds before spawning on website launch
+  useEffect(() => {
+    const initialDelayTimer = setTimeout(() => {
+      if (typeof window !== 'undefined') {
+        const initial = getSafeRandomPoint(window.innerWidth, window.innerHeight, mascotSize);
+        posRef.current = initial;
+        startPosRef.current = initial;
+        setPosX(initial.x);
+        setPosY(initial.y);
+      }
+      setMascotState('appearing');
+      appearTimeoutRef.current = setTimeout(() => {
+        setMascotState('roaming');
+        pickNewTarget();
+      }, APPEAR_DURATION_MS);
+    }, INITIAL_SPAWN_DELAY_MS);
+
+    return () => clearTimeout(initialDelayTimer);
+  }, [getSafeRandomPoint, mascotSize, pickNewTarget]);
+
   // Handle window resizing safely
   useEffect(() => {
     const handleResize = () => {
@@ -212,16 +233,6 @@ export const GhostMascot: React.FC = () => {
       }
     };
     document.addEventListener('visibilitychange', handleVisibilityChange);
-
-    // Initial random placement
-    if (typeof window !== 'undefined') {
-      const initial = getSafeRandomPoint(window.innerWidth, window.innerHeight, mascotSize);
-      posRef.current = initial;
-      startPosRef.current = initial;
-      setPosX(initial.x);
-      setPosY(initial.y);
-      pickNewTarget();
-    }
 
     const animate = (time: number) => {
       if (isTabVisible && mascotState === 'roaming') {

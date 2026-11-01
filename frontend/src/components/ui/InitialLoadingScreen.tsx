@@ -40,7 +40,7 @@ export const InitialLoadingScreen: React.FC<InitialLoadingScreenProps> = ({
     <div
       role="status"
       aria-live="polite"
-      className={`fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-white transition-opacity duration-500 ease-in-out ${
+      className={`fixed inset-0 z-[999999] flex flex-col items-center justify-center bg-white transition-opacity duration-500 ease-in-out ${
         isFadingOut ? 'opacity-0 pointer-events-none' : 'opacity-100'
       }`}
     >
