@@ -103,7 +103,7 @@ export const Navbar: React.FC = () => {
               to="/receive"
               className="bg-white text-[#111111] px-4 lg:px-5 py-2.5 text-[11px] font-bold tracking-[0.15em] uppercase hover:bg-[#F7F7F5] transition-colors border border-[#E5E5E5] hover:border-[#111111] rounded-none whitespace-nowrap"
             >
-              RECEIVE A LINK
+              RECEIVE A FILE
             </Link>
           </div>
 
