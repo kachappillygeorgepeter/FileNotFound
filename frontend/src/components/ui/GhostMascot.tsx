@@ -21,10 +21,8 @@ export const BOB_AMPLITUDE_PX = 8; // vertical sine-wave float: 6 to 10px
 export const BOB_FREQUENCY = 0.0028; // cycles per ms (gentle hovering tempo)
 export const MAX_TILT_DEG = 2.5; // slight tilt in direction of travel: 1 to 3 degrees
 
-// Orientation: The original logo_no_bg.png has its main shield peak on the left side,
-// so it faces left by default.
-// Set FACES_RIGHT_BY_DEFAULT = true if your image faces right naturally; false if left.
-export const FACES_RIGHT_BY_DEFAULT = false;
+// Orientation: Set FACES_RIGHT_BY_DEFAULT = true so it faces right when moving right, and flips left when moving left.
+export const FACES_RIGHT_BY_DEFAULT = true;
 
 // Vanish & Respawn timings
 export const VANISH_DURATION_MS = 600; // 500 to 700ms
