@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ExpiryOption, MaxDownloadsOption, UploadProgress } from '../types/share';
 import { Dropzone } from '../components/upload/Dropzone';
@@ -106,16 +106,72 @@ export const UploadPage: React.FC = () => {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
+  // Apple-style scroll-triggered reveal for "YOUR RULES."
+  const rulesRef = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    let rafId = 0;
+    const SCROLL_DISTANCE = 160; // Pixels of scroll for full reveal
+
+    const handleScroll = () => {
+      if (!rafId) {
+        rafId = requestAnimationFrame(() => {
+          rafId = 0;
+          if (!rulesRef.current) return;
+
+          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            rulesRef.current.style.opacity = '1';
+            rulesRef.current.style.filter = 'none';
+            rulesRef.current.style.transform = 'none';
+            return;
+          }
+
+          const currentY = window.scrollY || window.pageYOffset || 0;
+          const progress = Math.min(Math.max(currentY / SCROLL_DISTANCE, 0), 1);
+          const ease = progress * (2 - progress); // Smooth quadratic ease-out
+
+          const opacity = Math.min(1, Math.max(0, ease));
+          const blur = Math.max(0, (1 - ease) * 10);
+          const translateY = (1 - ease) * 18;
+
+          rulesRef.current.style.opacity = `${opacity}`;
+          rulesRef.current.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : 'none';
+          rulesRef.current.style.transform = `translate3d(0, ${translateY.toFixed(2)}px, 0)`;
+        });
+      }
+    };
+
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+
+    return () => {
+      if (rafId) cancelAnimationFrame(rafId);
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
   return (
     <div className="w-full min-h-screen bg-white select-none">
       {/* 1. MAIN HERO */}
       <section className="hero-section w-full min-h-[60vh] flex flex-col items-center justify-center pt-16 pb-20 px-6 relative bg-white border-b border-[#E5E5E5]">
         <div className="hero-container max-w-[1600px] w-full mx-auto flex flex-col items-center text-center">
-          <p className="text-[#111111] text-xs font-bold tracking-[0.4em] mb-12 normal-case">
+          <p className="hero-tagline text-[#111111] text-xs font-bold tracking-[0.4em] mb-12 normal-case">
             FileNotFound
           </p>
           <h1 className="hero-title text-6xl md:text-7xl lg:text-9xl font-extrabold text-[#111111] tracking-tighter leading-[0.85] mb-10 uppercase">
-            YOUR FILES.<br />YOUR RULES.
+            <span className="block">YOUR FILES.</span>
+            <span
+              ref={rulesRef}
+              style={{
+                opacity: 0,
+                filter: 'blur(10px)',
+                transform: 'translate3d(0, 18px, 0)',
+                willChange: 'opacity, filter, transform',
+              }}
+              className="hero-rules-reveal block"
+            >
+              YOUR RULES.
+            </span>
           </h1>
           <p className="hero-subtitle text-[#555555] text-lg md:text-xl font-medium tracking-wide max-w-xl mb-16 leading-relaxed">
             Share files securely with links that expire automatically and access limits you control.

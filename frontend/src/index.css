@@ -46,6 +46,14 @@
     height: 6px;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .hero-rules-reveal {
+      opacity: 1 !important;
+      filter: none !important;
+      transform: none !important;
+    }
+  }
+
   ::-webkit-scrollbar-track {
     background: #ffffff;
   }
