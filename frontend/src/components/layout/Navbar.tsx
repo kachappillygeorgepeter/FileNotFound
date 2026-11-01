@@ -12,7 +12,6 @@ export const Navbar: React.FC = () => {
 
   const navLinks = [
     { name: 'Home', href: '/' },
-    { name: 'Receive File', href: '/receive' },
     { name: 'How It Works', href: '/#how-it-works' },
     { name: 'Privacy', href: '/privacy' },
     { name: 'Terms', href: '/terms' },
@@ -47,7 +46,7 @@ export const Navbar: React.FC = () => {
             </Link>
 
             {/* Desktop Navigation Links (Switches at 775px) */}
-            <div className="navbar-desktop-nav ml-16 space-x-12">
+            <div className="navbar-desktop-nav ml-8 lg:ml-12 items-center space-x-6 lg:space-x-8 whitespace-nowrap">
               {navLinks.map((link) => {
                 const isAnchor = link.href.startsWith('/#');
                 const isActive =
@@ -58,7 +57,7 @@ export const Navbar: React.FC = () => {
                     <a
                       key={link.name}
                       href={link.href.replace('/', '')}
-                      className="text-[#555555] hover:text-[#111111] font-medium text-xs tracking-widest uppercase transition-colors"
+                      className="text-[#555555] hover:text-[#111111] font-medium text-xs tracking-widest uppercase transition-colors whitespace-nowrap"
                     >
                       {link.name}
                     </a>
@@ -73,7 +72,7 @@ export const Navbar: React.FC = () => {
                       isActive
                         ? 'text-[#111111] font-semibold'
                         : 'text-[#555555] hover:text-[#111111] font-medium'
-                    } text-xs tracking-widest uppercase transition-colors`}
+                    } text-xs tracking-widest uppercase transition-colors whitespace-nowrap`}
                   >
                     {link.name}
                   </Link>
@@ -83,29 +82,29 @@ export const Navbar: React.FC = () => {
           </div>
 
           {/* Right Action (Switches at 775px) */}
-          <div className="navbar-desktop-cta items-center gap-3">
-            <Link
-              to="/receive"
-              className="bg-white text-[#111111] px-6 py-3.5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] transition-colors border border-[#E5E5E5] hover:border-[#111111] rounded-none"
-            >
-              RECEIVE A LINK
-            </Link>
+          <div className="navbar-desktop-cta items-center gap-2 lg:gap-3 flex-shrink-0 whitespace-nowrap">
             {location.pathname === '/' ? (
               <button
                 type="button"
                 onClick={scrollToUpload}
-                className="bg-[#111111] text-white px-8 py-3.5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#333333] transition-colors border border-[#111111] rounded-none"
+                className="bg-[#111111] text-white px-4 lg:px-5 py-2.5 text-[11px] font-bold tracking-[0.15em] uppercase hover:bg-[#333333] transition-colors border border-[#111111] rounded-none whitespace-nowrap"
               >
                 SHARE A FILE
               </button>
             ) : (
               <Link
                 to="/"
-                className="bg-[#111111] text-white px-8 py-3.5 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#333333] transition-colors border border-[#111111] rounded-none"
+                className="bg-[#111111] text-white px-4 lg:px-5 py-2.5 text-[11px] font-bold tracking-[0.15em] uppercase hover:bg-[#333333] transition-colors border border-[#111111] rounded-none whitespace-nowrap"
               >
                 SHARE A FILE
               </Link>
             )}
+            <Link
+              to="/receive"
+              className="bg-white text-[#111111] px-4 lg:px-5 py-2.5 text-[11px] font-bold tracking-[0.15em] uppercase hover:bg-[#F7F7F5] transition-colors border border-[#E5E5E5] hover:border-[#111111] rounded-none whitespace-nowrap"
+            >
+              RECEIVE A LINK
+            </Link>
           </div>
 
           {/* Mobile menu toggle (Switches at 775px) */}
@@ -146,16 +145,16 @@ export const Navbar: React.FC = () => {
 
             <div className="pt-2 flex flex-col gap-3">
               <Link
-                to="/receive"
-                className="w-full text-center bg-white text-[#111111] py-4 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#F7F7F5] transition-colors border border-[#E5E5E5] rounded-none"
-              >
-                RECEIVE A LINK
-              </Link>
-              <Link
                 to="/"
-                className="w-full text-center bg-[#111111] text-white py-4 text-xs font-bold tracking-[0.2em] uppercase hover:bg-[#333333] transition-colors border border-[#111111] rounded-none"
+                className="w-full text-center bg-[#111111] text-white py-3.5 text-xs font-bold tracking-[0.15em] uppercase hover:bg-[#333333] transition-colors border border-[#111111] rounded-none"
               >
                 SHARE A FILE
+              </Link>
+              <Link
+                to="/receive"
+                className="w-full text-center bg-white text-[#111111] py-3.5 text-xs font-bold tracking-[0.15em] uppercase hover:bg-[#F7F7F5] transition-colors border border-[#E5E5E5] rounded-none"
+              >
+                RECEIVE A LINK
               </Link>
             </div>
           </div>
