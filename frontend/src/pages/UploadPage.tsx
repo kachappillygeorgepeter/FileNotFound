@@ -106,46 +106,42 @@ export const UploadPage: React.FC = () => {
     if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
-  // Apple-style scroll-triggered reveal for "YOUR RULES."
-  const rulesRef = useRef<HTMLSpanElement>(null);
+  // One-time scroll-triggered reveal for "YOUR RULES."
+  const [hasRevealed, setHasRevealed] = useState(false);
+  const hasRevealedRef = useRef(false);
 
   useEffect(() => {
-    let rafId = 0;
-    const SCROLL_DISTANCE = 160; // Pixels of scroll for full reveal
+    // If already revealed, do nothing
+    if (hasRevealedRef.current) return;
+
+    // Respect reduced-motion preferences
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      hasRevealedRef.current = true;
+      setHasRevealed(true);
+      return;
+    }
+
+    const TRIGGER_THRESHOLD = 25; // Pixels of scroll to trigger the reveal
 
     const handleScroll = () => {
-      if (!rafId) {
-        rafId = requestAnimationFrame(() => {
-          rafId = 0;
-          if (!rulesRef.current) return;
+      if (hasRevealedRef.current) return;
 
-          if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            rulesRef.current.style.opacity = '1';
-            rulesRef.current.style.filter = 'none';
-            rulesRef.current.style.transform = 'none';
-            return;
-          }
-
-          const currentY = window.scrollY || window.pageYOffset || 0;
-          const progress = Math.min(Math.max(currentY / SCROLL_DISTANCE, 0), 1);
-          const ease = progress * (2 - progress); // Smooth quadratic ease-out
-
-          const opacity = Math.min(1, Math.max(0, ease));
-          const blur = Math.max(0, (1 - ease) * 10);
-          const translateY = (1 - ease) * 18;
-
-          rulesRef.current.style.opacity = `${opacity}`;
-          rulesRef.current.style.filter = blur > 0.05 ? `blur(${blur.toFixed(2)}px)` : 'none';
-          rulesRef.current.style.transform = `translate3d(0, ${translateY.toFixed(2)}px, 0)`;
-        });
+      const currentY = window.scrollY || window.pageYOffset || 0;
+      if (currentY > TRIGGER_THRESHOLD) {
+        hasRevealedRef.current = true;
+        setHasRevealed(true);
+        window.removeEventListener('scroll', handleScroll);
       }
     };
 
-    window.addEventListener('scroll', handleScroll, { passive: true });
+    // Check on initial load in case already scrolled past threshold
     handleScroll();
 
+    if (!hasRevealedRef.current) {
+      window.addEventListener('scroll', handleScroll, { passive: true });
+    }
+
     return () => {
-      if (rafId) cancelAnimationFrame(rafId);
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
@@ -161,11 +157,11 @@ export const UploadPage: React.FC = () => {
           <h1 className="hero-title text-6xl md:text-7xl lg:text-9xl font-extrabold text-[#111111] tracking-tighter leading-[0.85] mb-10 uppercase">
             <span className="block">YOUR FILES.</span>
             <span
-              ref={rulesRef}
               style={{
-                opacity: 0,
-                filter: 'blur(10px)',
-                transform: 'translate3d(0, 18px, 0)',
+                opacity: hasRevealed ? 1 : 0,
+                filter: hasRevealed ? 'none' : 'blur(10px)',
+                transform: hasRevealed ? 'translate3d(0, 0, 0)' : 'translate3d(0, 18px, 0)',
+                transition: 'opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), filter 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1)',
                 willChange: 'opacity, filter, transform',
               }}
               className="hero-rules-reveal block"
